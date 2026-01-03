@@ -10,6 +10,10 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'ok' | 'error' | 'analyzing'>('all');
+  const [showScanModal, setShowScanModal] = useState(false);
+  const [scanFolder, setScanFolder] = useState('/home/lee/projects');
+  const [scanning, setScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState<string>('');
 
   useEffect(() => {
     loadMetadata();
@@ -51,6 +55,35 @@ function App() {
     }
   }
 
+  async function handleScanFolder() {
+    if (!scanFolder.trim()) {
+      setError('Please enter a folder path');
+      return;
+    }
+
+    try {
+      setScanning(true);
+      setError(null);
+      setScanProgress('Scanning folder for repositories...');
+      
+      const result = await api.analyzeFolder(scanFolder, 3, 'main', true);
+      
+      setScanProgress(`Found ${result.foundRepos} repositories, analyzed ${result.successfulAnalysis}`);
+      
+      setTimeout(async () => {
+        await loadMetadata();
+        setShowScanModal(false);
+        setScanProgress('');
+      }, 2000);
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to scan folder');
+      setScanProgress('');
+    } finally {
+      setScanning(false);
+    }
+  }
+
   const filteredRepos = filter === 'all' 
     ? repos 
     : repos.filter(r => r.status === filter);
@@ -72,13 +105,21 @@ function App() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Git Stats Dashboard
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Analyze and visualize git repository statistics
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              Git Stats Dashboard
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Analyze and visualize git repository statistics
+            </p>
+          </div>
+          <button
+            onClick={() => setShowScanModal(true)}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all"
+          >
+            📁 Scan Folder
+          </button>
         </div>
 
         {/* Filters */}
@@ -164,6 +205,67 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* Scan Folder Modal */}
+      {showScanModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Scan Folder for Repositories
+            </h2>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Folder Path
+              </label>
+              <input
+                type="text"
+                value={scanFolder}
+                onChange={(e) => setScanFolder(e.target.value)}
+                placeholder="/home/lee/projects"
+                disabled={scanning}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                This will scan up to 3 levels deep for git repositories
+              </p>
+            </div>
+
+            {scanProgress && (
+              <div className="mb-4 p-3 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-lg text-sm">
+                {scanProgress}
+              </div>
+            )}
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowScanModal(false);
+                  setScanProgress('');
+                }}
+                disabled={scanning}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleScanFolder}
+                disabled={scanning}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {scanning ? (
+                  <>
+                    <span className="animate-spin">⟳</span>
+                    Scanning...
+                  </>
+                ) : (
+                  'Scan & Analyze'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
