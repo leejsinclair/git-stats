@@ -48,8 +48,8 @@
       "prettier --write"
     ],
     "frontend/src/**/*.{ts,tsx}": [
-      "cd frontend && npx eslint --fix",
-      "cd frontend && npx prettier --write ."
+      "eslint --fix frontend",
+      "prettier --write frontend"
     ]
   }
 }
