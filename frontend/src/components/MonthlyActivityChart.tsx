@@ -1,4 +1,14 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+
 import type { MonthlyStats } from '../types';
 
 interface MonthlyActivityChartProps {
@@ -6,7 +16,10 @@ interface MonthlyActivityChartProps {
   title?: string;
 }
 
-export function MonthlyActivityChart({ data, title = 'Monthly Activity' }: MonthlyActivityChartProps) {
+export function MonthlyActivityChart({
+  data,
+  title = 'Monthly Activity',
+}: MonthlyActivityChartProps) {
   const chartData = data.map(month => ({
     month: month.month,
     commits: month.commits,
@@ -20,18 +33,14 @@ export function MonthlyActivityChart({ data, title = 'Monthly Activity' }: Month
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis 
-            dataKey="month" 
-            stroke="#9CA3AF"
-            tick={{ fill: '#9CA3AF' }}
-          />
+          <XAxis dataKey="month" stroke="#9CA3AF" tick={{ fill: '#9CA3AF' }} />
           <YAxis stroke="#9CA3AF" tick={{ fill: '#9CA3AF' }} />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: '#1F2937', 
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#1F2937',
               border: '1px solid #374151',
               borderRadius: '0.5rem',
-              color: '#F3F4F6'
+              color: '#F3F4F6',
             }}
           />
           <Legend />

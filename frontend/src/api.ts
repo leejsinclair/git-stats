@@ -1,4 +1,4 @@
-import type { RepoAnalysisResult, Metadata, RepoMetadata } from './types';
+import type { Metadata, RepoAnalysisResult, RepoMetadata } from './types';
 
 const API_BASE_URL = 'http://localhost:3000/api/git';
 
@@ -37,7 +37,7 @@ export const api = {
     maxDepth: number = 3,
     branch: string = 'main',
     saveResults: boolean = true
-  ): Promise<any> {
+  ): Promise<{foundRepos: number; successfulAnalysis: number}> {
     const response = await fetch(`${API_BASE_URL}/analyze/folder`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

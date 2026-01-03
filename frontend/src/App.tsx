@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import { api } from './api';
-import type { RepoMetadata, RepoAnalysisResult } from './types';
 import { RepoCard } from './components/RepoCard';
 import { RepoDetailView } from './components/RepoDetailView';
+import type { RepoAnalysisResult, RepoMetadata } from './types';
 
 function App() {
   const [repos, setRepos] = useState<RepoMetadata[]>([]);
@@ -42,7 +43,7 @@ function App() {
       // Extract filename from outputFile path
       const filename = repo.outputFile.split('/').pop();
       if (!filename) return;
-      
+
       // Fetch the analysis file directly
       const response = await fetch(`http://localhost:3000/data/output/${filename}`);
       if (!response.ok) throw new Error('Failed to load analysis');
@@ -65,17 +66,18 @@ function App() {
       setScanning(true);
       setError(null);
       setScanProgress('Scanning folder for repositories...');
-      
+
       const result = await api.analyzeFolder(scanFolder, 3, 'main', true);
-      
-      setScanProgress(`Found ${result.foundRepos} repositories, analyzed ${result.successfulAnalysis}`);
-      
+
+      setScanProgress(
+        `Found ${result.foundRepos} repositories, analyzed ${result.successfulAnalysis}`
+      );
+
       setTimeout(async () => {
         await loadMetadata();
         setShowScanModal(false);
         setScanProgress('');
       }, 2000);
-      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to scan folder');
       setScanProgress('');
@@ -84,18 +86,13 @@ function App() {
     }
   }
 
-  const filteredRepos = filter === 'all' 
-    ? repos 
-    : repos.filter(r => r.status === filter);
+  const filteredRepos = filter === 'all' ? repos : repos.filter(r => r.status === filter);
 
   if (selectedRepo) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
-          <RepoDetailView 
-            analysis={selectedRepo} 
-            onBack={() => setSelectedRepo(null)} 
-          />
+          <RepoDetailView analysis={selectedRepo} onBack={() => setSelectedRepo(null)} />
         </div>
       </div>
     );
@@ -195,12 +192,8 @@ function App() {
 
         {!loading && filteredRepos.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredRepos.map((repo) => (
-              <RepoCard
-                key={repo.repoPath}
-                repo={repo}
-                onClick={() => handleRepoClick(repo)}
-              />
+            {filteredRepos.map(repo => (
+              <RepoCard key={repo.repoPath} repo={repo} onClick={() => handleRepoClick(repo)} />
             ))}
           </div>
         )}
@@ -213,7 +206,7 @@ function App() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
               Scan Folder for Repositories
             </h2>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Folder Path
@@ -221,7 +214,7 @@ function App() {
               <input
                 type="text"
                 value={scanFolder}
-                onChange={(e) => setScanFolder(e.target.value)}
+                onChange={e => setScanFolder(e.target.value)}
                 placeholder="/home/lee/projects"
                 disabled={scanning}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -271,4 +264,3 @@ function App() {
 }
 
 export default App;
-

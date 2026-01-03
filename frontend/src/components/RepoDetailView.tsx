@@ -1,6 +1,6 @@
 import type { RepoAnalysisResult } from '../types';
-import { CommitTrendChart } from './CommitTrendChart';
 import { AuthorContributionChart } from './AuthorContributionChart';
+import { CommitTrendChart } from './CommitTrendChart';
 import { MonthlyActivityChart } from './MonthlyActivityChart';
 
 interface RepoDetailViewProps {
@@ -10,8 +10,7 @@ interface RepoDetailViewProps {
 
 export function RepoDetailView({ analysis, onBack }: RepoDetailViewProps) {
   const formatNumber = (num: number) => num.toLocaleString();
-  const formatDate = (date: string | null) => 
-    date ? new Date(date).toLocaleDateString() : 'N/A';
+  const formatDate = (date: string | null) => (date ? new Date(date).toLocaleDateString() : 'N/A');
 
   return (
     <div className="space-y-6">
@@ -23,7 +22,7 @@ export function RepoDetailView({ analysis, onBack }: RepoDetailViewProps) {
         >
           ← Back to repositories
         </button>
-        
+
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           {analysis.repoName}
         </h2>
@@ -40,21 +39,21 @@ export function RepoDetailView({ analysis, onBack }: RepoDetailViewProps) {
             {formatNumber(analysis.totalCommits)}
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="text-sm text-gray-600 dark:text-gray-400">Contributors</div>
           <div className="text-3xl font-bold text-green-600 dark:text-green-400">
             {analysis.authors.length}
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="text-sm text-gray-600 dark:text-gray-400">Lines Added</div>
           <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
             +{formatNumber(analysis.summary.totalLinesAdded)}
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="text-sm text-gray-600 dark:text-gray-400">Lines Removed</div>
           <div className="text-3xl font-bold text-red-600 dark:text-red-400">
@@ -65,7 +64,9 @@ export function RepoDetailView({ analysis, onBack }: RepoDetailViewProps) {
 
       {/* Date Range */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Repository Timeline</h3>
+        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+          Repository Timeline
+        </h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="text-sm text-gray-600 dark:text-gray-400">First Commit</div>
@@ -100,22 +101,22 @@ export function RepoDetailView({ analysis, onBack }: RepoDetailViewProps) {
             Recent Commits ({analysis.recentCommits.length})
           </h3>
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {analysis.recentCommits.slice(0, 20).map((commit) => (
+            {analysis.recentCommits.slice(0, 20).map(commit => (
               <div
                 key={commit.hash}
                 className="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-r"
               >
                 <div className="flex justify-between items-start mb-1">
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {commit.message}
-                  </div>
+                  <div className="font-medium text-gray-900 dark:text-white">{commit.message}</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 ml-4">
                     {new Date(commit.date).toLocaleDateString()}
                   </div>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {commit.author} • 
-                  <span className="text-green-600 dark:text-green-400 ml-2">+{commit.insertions}</span>
+                  {commit.author} •
+                  <span className="text-green-600 dark:text-green-400 ml-2">
+                    +{commit.insertions}
+                  </span>
                   <span className="text-red-600 dark:text-red-400 ml-1">-{commit.deletions}</span>
                   <span className="ml-2">{commit.files} files</span>
                 </div>

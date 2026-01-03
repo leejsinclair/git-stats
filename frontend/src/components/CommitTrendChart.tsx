@@ -1,4 +1,14 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+
 import type { WeeklyStats } from '../types';
 
 interface CommitTrendChartProps {
@@ -6,7 +16,10 @@ interface CommitTrendChartProps {
   title?: string;
 }
 
-export function CommitTrendChart({ data, title = 'Commit Trend Over Time' }: CommitTrendChartProps) {
+export function CommitTrendChart({
+  data,
+  title = 'Commit Trend Over Time',
+}: CommitTrendChartProps) {
   const chartData = data.map(week => ({
     date: week.weekStart,
     commits: week.commits,
@@ -20,39 +33,29 @@ export function CommitTrendChart({ data, title = 'Commit Trend Over Time' }: Com
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis 
-            dataKey="date" 
-            stroke="#9CA3AF"
-            tick={{ fill: '#9CA3AF' }}
-          />
+          <XAxis dataKey="date" stroke="#9CA3AF" tick={{ fill: '#9CA3AF' }} />
           <YAxis stroke="#9CA3AF" tick={{ fill: '#9CA3AF' }} />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: '#1F2937', 
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#1F2937',
               border: '1px solid #374151',
               borderRadius: '0.5rem',
-              color: '#F3F4F6'
+              color: '#F3F4F6',
             }}
           />
           <Legend />
-          <Line 
-            type="monotone" 
-            dataKey="commits" 
-            stroke="#3B82F6" 
-            strokeWidth={2}
-            name="Commits"
-          />
-          <Line 
-            type="monotone" 
-            dataKey="linesAdded" 
-            stroke="#10B981" 
+          <Line type="monotone" dataKey="commits" stroke="#3B82F6" strokeWidth={2} name="Commits" />
+          <Line
+            type="monotone"
+            dataKey="linesAdded"
+            stroke="#10B981"
             strokeWidth={2}
             name="Lines Added"
           />
-          <Line 
-            type="monotone" 
-            dataKey="linesRemoved" 
-            stroke="#EF4444" 
+          <Line
+            type="monotone"
+            dataKey="linesRemoved"
+            stroke="#EF4444"
             strokeWidth={2}
             name="Lines Removed"
           />

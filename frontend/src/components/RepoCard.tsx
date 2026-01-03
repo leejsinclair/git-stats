@@ -31,16 +31,16 @@ export function RepoCard({ repo, onClick }: RepoCardProps) {
           {statusIcons[repo.status]} {repo.status}
         </span>
       </div>
-      
-      <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-2">
-        {repo.repoPath}
-      </p>
-      
+
+      <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-2">{repo.repoPath}</p>
+
       <div className="text-xs text-gray-500 dark:text-gray-500">
-        <div>Branch: <span className="font-mono">{repo.branch || 'N/A'}</span></div>
+        <div>
+          Branch: <span className="font-mono">{repo.branch || 'N/A'}</span>
+        </div>
         <div>Last analyzed: {new Date(repo.lastAnalyzed).toLocaleString()}</div>
       </div>
-      
+
       {repo.error && (
         <div className="mt-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded">
           {repo.error}

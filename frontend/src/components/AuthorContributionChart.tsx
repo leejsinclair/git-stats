@@ -1,11 +1,23 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface AuthorContributionChartProps {
   data: Record<string, number>;
   title?: string;
 }
 
-export function AuthorContributionChart({ data, title = 'Author Contributions' }: AuthorContributionChartProps) {
+export function AuthorContributionChart({
+  data,
+  title = 'Author Contributions',
+}: AuthorContributionChartProps) {
   const chartData = Object.entries(data)
     .map(([author, commits]) => ({
       author: author.length > 20 ? author.substring(0, 20) + '...' : author,
@@ -20,8 +32,8 @@ export function AuthorContributionChart({ data, title = 'Author Contributions' }
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis 
-            dataKey="author" 
+          <XAxis
+            dataKey="author"
             stroke="#9CA3AF"
             tick={{ fill: '#9CA3AF', fontSize: 12 }}
             angle={-45}
@@ -29,21 +41,16 @@ export function AuthorContributionChart({ data, title = 'Author Contributions' }
             height={100}
           />
           <YAxis stroke="#9CA3AF" tick={{ fill: '#9CA3AF' }} />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: '#1F2937', 
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#1F2937',
               border: '1px solid #374151',
               borderRadius: '0.5rem',
-              color: '#F3F4F6'
+              color: '#F3F4F6',
             }}
           />
           <Legend />
-          <Bar 
-            dataKey="commits" 
-            fill="#8B5CF6" 
-            name="Commits"
-            radius={[8, 8, 0, 0]}
-          />
+          <Bar dataKey="commits" fill="#8B5CF6" name="Commits" radius={[8, 8, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
