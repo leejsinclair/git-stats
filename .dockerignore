@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+
+# Build outputs
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+# Environment variables
+.env
+.env.local
+
+# Data and output
+data/output/
+data/repos/
+data/visualizations/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Cache
+.cache/
+.vite/

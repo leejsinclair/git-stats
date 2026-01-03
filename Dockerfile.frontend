@@ -1,0 +1,27 @@
+FROM node:24.2.0-alpine
+
+# Install git
+RUN apk add --no-cache git
+
+WORKDIR /app/frontend
+
+# Copy package files
+COPY frontend/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source
+COPY frontend ./
+
+# Build frontend
+RUN npm run build
+
+RUN mkdir -p /app/frontend/node_modules/.vite-temp
+RUN chmod -R 777 /app/frontend/node_modules/.vite-temp
+
+# Expose port
+EXPOSE 5173
+
+# Start preview server
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173"]

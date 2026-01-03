@@ -10,21 +10,65 @@ A full-stack application for analyzing and visualizing git repository statistics
 
 ## Quick Start
 
-### 1. Start Backend (Port 3000)
+### Option 1: Docker (Recommended)
+
+```bash
+# Build and start both services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+Access:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3000
+
+### Option 2: Local Development
+
+#### 1. Start Backend (Port 3000)
 ```bash
 # From project root
+npm install
 npm run dev
 ```
 
-### 2. Start Frontend (Port 5173)
+#### 2. Start Frontend (Port 5173)
 ```bash
 # In a new terminal
 cd frontend
+npm install
 npm run dev
 ```
 
-### 3. Access Dashboard
+#### 3. Access Dashboard
 Open http://localhost:5173 in your browser
+
+## Docker Commands
+
+```bash
+# Build images
+docker-compose build
+
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Restart services
+docker-compose restart
+
+# Stop and remove containers
+docker-compose down
+
+# Rebuild and restart
+docker-compose up -d --build
+```
 
 ## API Endpoints
 

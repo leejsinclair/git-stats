@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: git-stats-backend
+    user: "1000:1000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+      - /home/lee/projects:/app/repos:ro
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    command: npm start
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: git-stats-frontend
+    user: "1000:1000"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/frontend/src
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    command: npm run preview -- --host 0.0.0.0 --port 5173
+    restart: unless-stopped
+
+networks:
+  default:
+    name: git-stats-network
