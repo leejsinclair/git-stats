@@ -4,10 +4,16 @@
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Run backend tests
-echo "Running backend tests..."
-npm test || exit 1
+# Run backend tests with coverage
+echo "Running backend tests with coverage..."
+npm run test:coverage || exit 1
+npm run coverage:badge
 
-# Run frontend tests
-echo "Running frontend tests..."
-cd frontend && npm test -- --run || exit 1
+# Run frontend tests with coverage
+echo "Running frontend tests with coverage..."
+cd frontend && npm run test:coverage -- --run || exit 1
+cd frontend && npm run coverage:badge
+
+echo "✓ All tests passed with coverage stats generated"
+echo "  Backend coverage: coverage/lcov.info (badge: coverage-backend.svg)"
+echo "  Frontend coverage: frontend/coverage/lcov.info (badge: frontend/coverage-frontend.svg)"
