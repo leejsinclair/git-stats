@@ -3,7 +3,7 @@ import { useState } from 'react';
 interface ScanModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onScan: (folder: string) => Promise<any>;
+  onScan: (folder: string) => Promise<{ foundRepos: number; successfulAnalysis: number }>;
   initialFolder?: string;
 }
 

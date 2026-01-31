@@ -22,7 +22,7 @@ export function CleanupModal({ isOpen, onClose, onConfirm, cleanupInfo }: Cleanu
       setCleaning(true);
       await onConfirm();
       onClose();
-    } catch (err) {
+    } catch {
       // Error handling is done in parent
     } finally {
       setCleaning(false);

@@ -67,7 +67,7 @@ export const api = {
   },
 
   // Preview old files to be cleaned up
-  async previewOldFiles(): Promise<{ oldFilesCount: number; currentFilesCount: number; totalFilesCount: number; oldFiles: any[] }> {
+  async previewOldFiles(): Promise<{ oldFilesCount: number; currentFilesCount: number; totalFilesCount: number; oldFiles: string[] }> {
     const response = await fetch(`${CLEANUP_API_URL}/old-files`);
     if (!response.ok) throw new Error('Failed to preview old files');
     const data = await response.json();
