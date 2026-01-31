@@ -1,3 +1,6 @@
+![Backend Coverage](./coverage-backend.svg)
+![Frontend Coverage](./frontend/coverage-frontend.svg)
+
 # Git Statistics Dashboard
 
 A comprehensive full-stack application for analyzing Git repositories, tracking developer metrics, and ensuring commit message quality. Features include hierarchical data aggregation, developer insights, and commit message compliance analysis.
