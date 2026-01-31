@@ -1,4 +1,4 @@
-import type { RepoMetadata } from '../types';
+import type { RepoMetadata } from '../../types';
 
 interface RepoCardProps {
   repo: RepoMetadata;

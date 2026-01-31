@@ -9,7 +9,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import type { MonthlyStats } from '../types';
+import type { MonthlyStats } from '../../types';
 
 interface MonthlyActivityChartProps {
   data: MonthlyStats[];

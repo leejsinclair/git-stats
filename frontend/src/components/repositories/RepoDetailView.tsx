@@ -1,7 +1,7 @@
-import type { RepoAnalysisResult } from '../types';
-import { AuthorContributionChart } from './AuthorContributionChart';
-import { CommitTrendChart } from './CommitTrendChart';
-import { MonthlyActivityChart } from './MonthlyActivityChart';
+import type { RepoAnalysisResult } from '../../types';
+import { AuthorContributionChart } from '../charts/AuthorContributionChart';
+import { CommitTrendChart } from '../charts/CommitTrendChart';
+import { MonthlyActivityChart } from '../charts/MonthlyActivityChart';
 
 interface RepoDetailViewProps {
   analysis: RepoAnalysisResult;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '../test/test-utils';
-import { DeveloperCard } from '../components/DeveloperCard';
+import { DeveloperCard } from '../components/developers/DeveloperCard';
 import type { DeveloperStats } from '../types';
 
 describe('DeveloperCard', () => {

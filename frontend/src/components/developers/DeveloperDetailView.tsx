@@ -14,7 +14,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import type { DeveloperStats } from '../types';
+import type { DeveloperStats } from '../../types';
 
 interface DeveloperDetailViewProps {
   developer: DeveloperStats;

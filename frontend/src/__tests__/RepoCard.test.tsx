@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '../test/test-utils';
-import { RepoCard } from '../components/RepoCard';
+import { RepoCard } from '../components/repositories/RepoCard';
 import type { RepoMetadata } from '../types';
 
 describe('RepoCard', () => {

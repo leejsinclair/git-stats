@@ -1,5 +1,5 @@
 import { DeveloperCard } from './DeveloperCard';
-import type { DeveloperStats } from '../types';
+import type { DeveloperStats } from '../../types';
 
 interface DevelopersListProps {
   developers: DeveloperStats[];

@@ -1,5 +1,5 @@
 import { RepoCard } from './RepoCard';
-import type { RepoMetadata } from '../types';
+import type { RepoMetadata } from '../../types';
 
 type FilterStatus = 'all' | 'ok' | 'error' | 'analyzing';
 

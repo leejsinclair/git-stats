@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '../test/test-utils';
 import userEvent from '@testing-library/user-event';
-import { ViewTabs } from '../components/ViewTabs';
+import { ViewTabs } from '../components/layout/ViewTabs';
 
 describe('ViewTabs', () => {
   it('should render both tabs', () => {

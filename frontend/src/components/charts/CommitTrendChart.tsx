@@ -9,7 +9,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import type { WeeklyStats } from '../types';
+import type { WeeklyStats } from '../../types';
 
 interface CommitTrendChartProps {
   data: WeeklyStats[];

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 
 import { api } from './api';
-import { CleanupModal } from './components/CleanupModal';
-import { DeveloperDetailView } from './components/DeveloperDetailView';
-import { DevelopersList } from './components/DevelopersList';
-import { Header } from './components/Header';
-import { RepoDetailView } from './components/RepoDetailView';
-import { ReposList } from './components/ReposList';
-import { ScanModal } from './components/ScanModal';
-import { ViewTabs } from './components/ViewTabs';
+import { DeveloperDetailView } from './components/developers/DeveloperDetailView';
+import { DevelopersList } from './components/developers/DevelopersList';
+import { Header } from './components/layout/Header';
+import { ViewTabs } from './components/layout/ViewTabs';
+import { CleanupModal } from './components/modals/CleanupModal';
+import { ScanModal } from './components/modals/ScanModal';
+import { RepoDetailView } from './components/repositories/RepoDetailView';
+import { ReposList } from './components/repositories/ReposList';
 import type { DeveloperStats, RepoAnalysisResult, RepoMetadata } from './types';
 
 type ViewMode = 'repos' | 'developers';
