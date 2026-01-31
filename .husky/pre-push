@@ -6,7 +6,7 @@ export NVM_DIR="$HOME/.nvm"
 
 # Run backend tests
 echo "Running backend tests..."
-npm test -- --run || exit 1
+npm test || exit 1
 
 # Run frontend tests
 echo "Running frontend tests..."
