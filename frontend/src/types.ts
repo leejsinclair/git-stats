@@ -85,6 +85,8 @@ export interface DeveloperCommitMetrics {
   linesRemoved: number;
   linesModified: number;
   repositories: string[];
+  documentationRatio: number;
+  testRatio: number;
 }
 
 export interface DeveloperMessageCompliance {

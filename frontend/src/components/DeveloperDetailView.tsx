@@ -302,7 +302,7 @@ export function DeveloperDetailView({ developer, onBack }: DeveloperDetailViewPr
           )}
         </div>
 
-        {/* Commit Type Pie Chart */}
+        {/* Work Distribution */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
             Work Distribution
@@ -333,34 +333,116 @@ export function DeveloperDetailView({ developer, onBack }: DeveloperDetailViewPr
             </PieChart>
           </ResponsiveContainer>
         </div>
+
+        {/* Documentation Ratio */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            📚 Documentation Ratio
+          </h2>
+          <div className="text-center mb-4">
+            <div className={`text-5xl font-bold ${
+              metrics.documentationRatio >= 15 
+                ? 'text-green-600 dark:text-green-400' 
+                : metrics.documentationRatio >= 10
+                ? 'text-yellow-600 dark:text-yellow-400'
+                : 'text-red-600 dark:text-red-400'
+            }`}>
+              {metrics.documentationRatio.toFixed(1)}%
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              of total commits
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">Status</div>
+            <div className={`text-sm font-medium ${
+              metrics.documentationRatio >= 15 
+                ? 'text-green-600 dark:text-green-400' 
+                : metrics.documentationRatio >= 10
+                ? 'text-yellow-600 dark:text-yellow-400'
+                : 'text-red-600 dark:text-red-400'
+            }`}>
+              {metrics.documentationRatio >= 15 
+                ? '✓ Excellent - Well documented' 
+                : metrics.documentationRatio >= 10
+                ? '✓ Good - Could improve'
+                : '⚠️ Low - Needs more documentation'}
+            </div>
+          </div>
+          <div className="mt-4 text-xs text-gray-500 dark:text-gray-500">
+            💡 Includes commits with docs:, README, or documentation keywords
+          </div>
+        </div>
+
+        {/* Test Ratio */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            🧪 Test Coverage Ratio
+          </h2>
+          <div className="text-center mb-4">
+            <div className={`text-5xl font-bold ${
+              metrics.testRatio >= 20 
+                ? 'text-green-600 dark:text-green-400' 
+                : metrics.testRatio >= 10
+                ? 'text-yellow-600 dark:text-yellow-400'
+                : 'text-red-600 dark:text-red-400'
+            }`}>
+              {metrics.testRatio.toFixed(1)}%
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              of total commits
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">Status</div>
+            <div className={`text-sm font-medium ${
+              metrics.testRatio >= 20 
+                ? 'text-green-600 dark:text-green-400' 
+                : metrics.testRatio >= 10
+                ? 'text-yellow-600 dark:text-yellow-400'
+                : 'text-red-600 dark:text-red-400'
+            }`}>
+              {metrics.testRatio >= 20 
+                ? '✓ Excellent - Strong testing culture' 
+                : metrics.testRatio >= 10
+                ? '✓ Good - Room for improvement'
+                : '⚠️ Low - Consider adding more tests'}
+            </div>
+          </div>
+          <div className="mt-4 text-xs text-gray-500 dark:text-gray-500">
+            💡 Includes commits with test:, spec, or testing keywords
+          </div>
+        </div>
       </div>
 
-      {/* </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Repositories</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                {metrics.repositories.length}
-              </div>
+      {/* Repository and Activity Stats */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          Overview
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <div className="text-sm text-gray-600 dark:text-gray-400">Repositories</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {metrics.repositories.length}
             </div>
-            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Lines Modified</div>
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {metrics.linesModified.toLocaleString()}
-              </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <div className="text-sm text-gray-600 dark:text-gray-400">Lines Modified</div>
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              {metrics.linesModified.toLocaleString()}
             </div>
-            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Active Days</div>
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {activity.activeDays}
-              </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <div className="text-sm text-gray-600 dark:text-gray-400">Active Days</div>
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {activity.activeDays}
             </div>
-            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Files Changed</div>
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {metrics.filesChanged.toLocaleString()}
-              </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <div className="text-sm text-gray-600 dark:text-gray-400">Avg Commits/Day</div>
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              {activity.averageCommitsPerDay.toFixed(1)}
             </div>
           </div>
         </div>

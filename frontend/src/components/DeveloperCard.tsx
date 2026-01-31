@@ -63,6 +63,31 @@ export function DeveloperCard({ developer, onClick }: DeveloperCardProps) {
             +{metrics.linesAdded.toLocaleString()} / -{metrics.linesRemoved.toLocaleString()}
           </div>
         </div>
+        <div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Quality Metrics</div>
+          <div className="text-xs space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500 dark:text-gray-500">📚 Docs:</span>
+              <span className={`font-semibold ${
+                metrics.documentationRatio >= 15 ? 'text-green-600 dark:text-green-400' :
+                metrics.documentationRatio >= 10 ? 'text-yellow-600 dark:text-yellow-400' :
+                'text-red-600 dark:text-red-400'
+              }`}>
+                {metrics.documentationRatio.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500 dark:text-gray-500">🧪 Tests:</span>
+              <span className={`font-semibold ${
+                metrics.testRatio >= 20 ? 'text-green-600 dark:text-green-400' :
+                metrics.testRatio >= 10 ? 'text-yellow-600 dark:text-yellow-400' :
+                'text-red-600 dark:text-red-400'
+              }`}>
+                {metrics.testRatio.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {messageCompliance && (

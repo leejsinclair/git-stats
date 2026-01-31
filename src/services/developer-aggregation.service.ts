@@ -48,6 +48,8 @@ interface DeveloperMetrics {
   linesRemoved: number;
   linesModified: number;
   repositories: string[];
+  documentationRatio: number; // docs/README commits / total commits
+  testRatio: number; // test commits / total commits
 }
 
 interface MessageComplianceMetrics {
@@ -165,6 +167,8 @@ export class DeveloperAggregationService {
               linesRemoved: 0,
               linesModified: 0,
               repositories: [],
+              documentationRatio: 0,
+              testRatio: 0,
             },
             messageCompliance: {
               totalMessages: 0,
@@ -310,6 +314,7 @@ export class DeveloperAggregationService {
       this.calculateCommitTypeDistribution(dev);
       this.calculateFileChurn(dev);
       this.calculateWorkingHoursAnalysis(dev);
+      this.calculateDocumentationAndTestRatios(dev);
     }
 
     const developers = Array.from(developerMap.values()).sort(
@@ -578,6 +583,44 @@ export class DeveloperAggregationService {
     } else {
       dev.workingHoursAnalysis.preferredWorkingHours = 'night';
     }
+  }
+
+  /**
+   * Calculate documentation and test ratios
+   */
+  private calculateDocumentationAndTestRatios(dev: DeveloperStats): void {
+    if (dev.recentCommits.length === 0) return;
+
+    let docCommits = 0;
+    let testCommits = 0;
+
+    for (const commit of dev.recentCommits) {
+      const message = commit.message.toLowerCase();
+
+      // Check if it's a documentation commit
+      // Look for docs keywords in message or conventional commit type
+      if (
+        message.startsWith('docs:') ||
+        message.startsWith('docs(') ||
+        /\b(readme|documentation|docs|doc|guide|tutorial)\b/i.test(message)
+      ) {
+        docCommits++;
+      }
+
+      // Check if it's a test commit
+      // Look for test keywords in message or conventional commit type
+      if (
+        message.startsWith('test:') ||
+        message.startsWith('test(') ||
+        /\b(test|tests|testing|spec|specs)\b/i.test(message)
+      ) {
+        testCommits++;
+      }
+    }
+
+    const totalCommits = dev.metrics.totalCommits;
+    dev.metrics.documentationRatio = totalCommits > 0 ? (docCommits / totalCommits) * 100 : 0;
+    dev.metrics.testRatio = totalCommits > 0 ? (testCommits / totalCommits) * 100 : 0;
   }
 
   /**
