@@ -64,9 +64,9 @@ describe('DeveloperAggregationService', () => {
         expect(dist).toHaveProperty('averageLinesPerCommit');
         expect(dist).toHaveProperty('medianLinesPerCommit');
 
-        // Total should match commit count
+        // Total should match recent commits (limited to 50), not all commits
         const total = dist.tiny + dist.small + dist.medium + dist.large + dist.huge;
-        expect(total).toBe(developer.metrics.totalCommits);
+        expect(total).toBe(developer.recentCommits.length);
       }
     });
 
