@@ -78,3 +78,105 @@ export interface Metadata {
   repositories: RepoMetadata[];
   lastUpdated: string;
 }
+
+export interface DeveloperCommitMetrics {
+  totalCommits: number;
+  linesAdded: number;
+  linesRemoved: number;
+  linesModified: number;
+  repositories: string[];
+}
+
+export interface DeveloperMessageCompliance {
+  totalMessages: number;
+  validMessages: number;
+  averageScore: number;
+  passPercentage: number;
+  commonIssues: {
+    rule: string;
+    count: number;
+    description: string;
+  }[];
+}
+
+export interface DeveloperActivity {
+  totalDays: number;
+  activeDays: number;
+  averageCommitsPerDay: number;
+  mostActiveDay: string | null;
+  commitsByDayOfWeek: Record<string, number>;
+  commitsByHour: Record<number, number>;
+  recentActivity: {
+    date: string;
+    commits: number;
+    linesAdded: number;
+    linesRemoved: number;
+  }[];
+}
+
+export interface CommitSizeDistribution {
+  tiny: number;
+  small: number;
+  medium: number;
+  large: number;
+  huge: number;
+  averageLinesPerCommit: number;
+  medianLinesPerCommit: number;
+}
+
+export interface CommitTypeDistribution {
+  feat: number;
+  fix: number;
+  docs: number;
+  style: number;
+  refactor: number;
+  perf: number;
+  test: number;
+  build: number;
+  ci: number;
+  chore: number;
+  other: number;
+  bugFixRatio: number;
+}
+
+export interface FileChurn {
+  filePath: string;
+  changes: number;
+  commits: number;
+  lastModified: string;
+}
+
+export interface WorkingHoursAnalysis {
+  lateNightCommits: number;
+  weekendCommits: number;
+  businessHoursCommits: number;
+  lateNightPercentage: number;
+  weekendPercentage: number;
+  preferredWorkingHours: string;
+}
+
+export interface DeveloperStats {
+  name: string;
+  email: string;
+  metrics: DeveloperCommitMetrics;
+  messageCompliance?: DeveloperMessageCompliance;
+  activity: DeveloperActivity;
+  commitSizeDistribution: CommitSizeDistribution;
+  commitTypeDistribution: CommitTypeDistribution;
+  fileChurn: FileChurn[];
+  workingHoursAnalysis: WorkingHoursAnalysis;
+  recentCommits: {
+    hash: string;
+    date: string;
+    message: string;
+    repo: string;
+    insertions: number;
+    deletions: number;
+  }[];
+}
+
+export interface DeveloperReport {
+  totalDevelopers: number;
+  developers: DeveloperStats[];
+  generatedAt: string;
+}

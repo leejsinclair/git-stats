@@ -1,8 +1,12 @@
-import express from 'express';
 import cors from 'cors';
+import express from 'express';
 import path from 'path';
-import { config } from './config';
+
+import cleanupRouter from './api/routes/cleanup';
+import { commitMessageRouter } from './api/routes/commit-message';
+import { developerRouter } from './api/routes/developer';
 import { gitRouter } from './api/routes/git';
+import { config } from './config';
 import { MetadataService } from './services/metadata.service';
 
 const app = express();
@@ -16,6 +20,9 @@ app.use('/data', express.static(path.join(process.cwd(), 'data')));
 
 // Routes
 app.use('/api/git', gitRouter);
+app.use('/api/commit-messages', commitMessageRouter);
+app.use('/api/developers', developerRouter);
+app.use('/api/cleanup', cleanupRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

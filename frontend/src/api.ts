@@ -1,6 +1,8 @@
-import type { Metadata, RepoAnalysisResult, RepoMetadata } from './types';
+import type { Metadata, RepoAnalysisResult, RepoMetadata, DeveloperReport } from './types';
 
 const API_BASE_URL = 'http://localhost:3000/api/git';
+const DEVELOPER_API_URL = 'http://localhost:3000/api/developers';
+const CLEANUP_API_URL = 'http://localhost:3000/api/cleanup';
 
 export const api = {
   // Get all metadata
@@ -54,5 +56,31 @@ export const api = {
     const response = await fetch(`/data/output/${repoName}-analysis-${timestamp}.json`);
     if (!response.ok) throw new Error('Failed to load analysis file');
     return await response.json();
+  },
+
+  // Get developer statistics
+  async getDeveloperStats(): Promise<DeveloperReport> {
+    const response = await fetch(`${DEVELOPER_API_URL}/stats`);
+    if (!response.ok) throw new Error('Failed to fetch developer statistics');
+    const data = await response.json();
+    return data.data;
+  },
+
+  // Preview old files to be cleaned up
+  async previewOldFiles(): Promise<{ oldFilesCount: number; currentFilesCount: number; totalFilesCount: number; oldFiles: any[] }> {
+    const response = await fetch(`${CLEANUP_API_URL}/old-files`);
+    if (!response.ok) throw new Error('Failed to preview old files');
+    const data = await response.json();
+    return data.data;
+  },
+
+  // Clean up old analysis files
+  async cleanupOldFiles(): Promise<{ deletedCount: number; deletedFiles: string[]; message: string }> {
+    const response = await fetch(`${CLEANUP_API_URL}/old-files`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to cleanup old files');
+    const data = await response.json();
+    return data.data;
   },
 };

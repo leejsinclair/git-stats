@@ -1,0 +1,42 @@
+###
+# Commit Message Analyzer API Examples
+# Use these examples to test the commit message analysis endpoints
+###
+
+### Get Best Practices Information
+GET http://localhost:3000/api/commit-messages/best-practices
+
+###
+# Analyze Commit Messages in Current Repository
+POST http://localhost:3000/api/commit-messages/analyze
+Content-Type: application/json
+
+{
+  "repoPath": "/home/lee/projects/git-stats",
+  "branch": "main",
+  "limit": 50
+}
+
+###
+# Analyze Commit Messages with Date Range
+POST http://localhost:3000/api/commit-messages/analyze
+Content-Type: application/json
+
+{
+  "repoPath": "/home/lee/projects/git-stats",
+  "since": "2024-01-01",
+  "until": "2026-01-31",
+  "limit": 100
+}
+
+###
+# Analyze Previously Cloned Repository
+# First clone a repo using: POST /api/git/analyze/remote
+# Then analyze its commit messages using the repo name
+POST http://localhost:3000/api/commit-messages/analyze/repo/git-stats
+Content-Type: application/json
+
+{
+  "branch": "main",
+  "limit": 50
+}
