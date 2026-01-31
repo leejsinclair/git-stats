@@ -5,6 +5,14 @@ interface ViewTabsProps {
   onViewModeChange: (mode: ViewMode) => void;
 }
 
+/**
+ * Tab navigation to switch between repositories and developers views.
+ * 
+ * @param props - Component props
+ * @param props.viewMode - Currently active view mode ('repos' or 'developers')
+ * @param props.onViewModeChange - Callback when a tab is clicked to change view mode
+ * @returns A tab navigation component with visual active state
+ */
 export function ViewTabs({ viewMode, onViewModeChange }: ViewTabsProps) {
   return (
     <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-700">

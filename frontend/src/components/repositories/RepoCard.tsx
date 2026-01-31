@@ -5,6 +5,14 @@ interface RepoCardProps {
   onClick: () => void;
 }
 
+/**
+ * Displays a card with repository information including status, path, and last analyzed time.
+ * 
+ * @param props - Component props
+ * @param props.repo - Repository metadata containing name, path, status, and analysis info
+ * @param props.onClick - Callback when the card is clicked to view repository details
+ * @returns A clickable card component displaying repository summary
+ */
 export function RepoCard({ repo, onClick }: RepoCardProps) {
   const statusColors = {
     ok: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',

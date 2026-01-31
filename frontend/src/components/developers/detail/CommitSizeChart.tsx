@@ -5,6 +5,13 @@ interface CommitSizeChartProps {
   distribution: CommitSizeDistribution;
 }
 
+/**
+ * Displays a bar chart showing the distribution of commit sizes by line count.
+ * 
+ * @param props - Component props
+ * @param props.distribution - Commit size distribution data with counts by size category
+ * @returns A card with bar chart showing commit size distribution and best practice tip
+ */
 export function CommitSizeChart({ distribution }: CommitSizeChartProps) {
   const commitSizeData = [
     { size: 'Tiny (1-10)', commits: distribution.tiny, color: '#10b981' },

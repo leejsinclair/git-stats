@@ -8,6 +8,14 @@ interface RepoDetailViewProps {
   onBack: () => void;
 }
 
+/**
+ * Displays detailed analysis and statistics for a single repository.
+ * 
+ * @param props - Component props
+ * @param props.analysis - Complete repository analysis including commits, contributors, and aggregations
+ * @param props.onBack - Callback to navigate back to the repositories list
+ * @returns A detailed view with charts, statistics, and commit history for a repository
+ */
 export function RepoDetailView({ analysis, onBack }: RepoDetailViewProps) {
   const formatNumber = (num: number) => num.toLocaleString();
   const formatDate = (date: string | null) => (date ? new Date(date).toLocaleDateString() : 'N/A');

@@ -62,6 +62,14 @@ const typeColors: Record<string, string> = {
   chore: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
 };
 
+/**
+ * Displays a table of recent commits with conventional commit type badges and message validation.
+ * 
+ * @param props - Component props
+ * @param props.commits - Array of commit objects to display
+ * @param props.maxDisplay - Maximum number of commits to show (defaults to 20)
+ * @returns A styled list of commits with type badges, validation warnings, and code change metrics
+ */
 export function RecentCommitsTable({ commits, maxDisplay = 20 }: RecentCommitsTableProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">

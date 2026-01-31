@@ -5,6 +5,13 @@ interface CommitTypeChartProps {
   distribution: CommitTypeDistribution;
 }
 
+/**
+ * Displays a horizontal bar chart showing the distribution of commit types (feat, fix, refactor, etc.).
+ * 
+ * @param props - Component props
+ * @param props.distribution - Commit type distribution data with counts by conventional commit type
+ * @returns A card with horizontal bar chart showing commit type distribution and bug fix ratio analysis
+ */
 export function CommitTypeChart({ distribution }: CommitTypeChartProps) {
   const commitTypeData = [
     { type: 'feat', count: distribution.feat, label: 'Features' },

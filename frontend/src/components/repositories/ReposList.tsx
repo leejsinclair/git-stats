@@ -10,6 +10,16 @@ interface ReposListProps {
   onRepoClick: (repo: RepoMetadata) => void;
 }
 
+/**
+ * Displays a filtered grid of repository cards with status filter buttons.
+ * 
+ * @param props - Component props
+ * @param props.repos - Array of repository metadata to display
+ * @param props.filter - Current filter status ('all', 'ok', 'error', or 'analyzing')
+ * @param props.onFilterChange - Callback when a filter button is clicked
+ * @param props.onRepoClick - Callback when a repository card is clicked
+ * @returns A filterable grid of repository cards with filter controls
+ */
 export function ReposList({ repos, filter, onFilterChange, onRepoClick }: ReposListProps) {
   const filteredRepos = filter === 'all' ? repos : repos.filter(r => r.status === filter);
 

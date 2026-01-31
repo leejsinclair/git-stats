@@ -5,6 +5,14 @@ interface DeveloperCardProps {
   onClick: () => void;
 }
 
+/**
+ * Displays a card with developer statistics including commit count, quality metrics, and message compliance.
+ * 
+ * @param props - Component props
+ * @param props.developer - Developer statistics data including metrics, activity, and message compliance
+ * @param props.onClick - Callback when the card is clicked to view detailed information
+ * @returns A clickable card component displaying developer summary statistics
+ */
 export function DeveloperCard({ developer, onClick }: DeveloperCardProps) {
   const { name, email, metrics, messageCompliance, activity } = developer;
 

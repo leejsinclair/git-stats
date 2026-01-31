@@ -14,6 +14,14 @@ interface DeveloperDetailViewProps {
   onBack: () => void;
 }
 
+/**
+ * Displays comprehensive statistics and charts for a single developer.
+ * 
+ * @param props - Component props
+ * @param props.developer - Detailed developer statistics including commits, metrics, and activity patterns
+ * @param props.onBack - Callback to navigate back to the developers list
+ * @returns A detailed view with charts, tables, and metrics for a developer
+ */
 export function DeveloperDetailView({ developer, onBack }: DeveloperDetailViewProps) {
   const { name, email, metrics, messageCompliance, activity, recentCommits, commitSizeDistribution, commitTypeDistribution, workingHoursAnalysis } = developer;
 

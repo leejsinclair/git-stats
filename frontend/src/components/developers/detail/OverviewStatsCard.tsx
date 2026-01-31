@@ -5,6 +5,16 @@ interface OverviewStatsCardProps {
   averageCommitsPerDay: number;
 }
 
+/**
+ * Displays key overview statistics for a developer in a grid layout.
+ * 
+ * @param props - Component props
+ * @param props.repositoryCount - Number of repositories the developer has contributed to
+ * @param props.linesModified - Total lines of code modified (added + removed)
+ * @param props.activeDays - Number of unique days with commits
+ * @param props.averageCommitsPerDay - Average commits made per active day
+ * @returns A card with a grid of overview statistics
+ */
 export function OverviewStatsCard({ repositoryCount, linesModified, activeDays, averageCommitsPerDay }: OverviewStatsCardProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 border border-gray-200 dark:border-gray-700">

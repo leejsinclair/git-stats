@@ -16,6 +16,14 @@ interface CommitTrendChartProps {
   title?: string;
 }
 
+/**
+ * Displays a line chart showing commit trends and code changes over time.
+ * 
+ * @param props - Component props
+ * @param props.data - Array of weekly statistics containing commits and line changes
+ * @param props.title - Optional custom chart title (defaults to 'Commit Trend Over Time')
+ * @returns A line chart component displaying commit trends with lines added/removed
+ */
 export function CommitTrendChart({
   data,
   title = 'Commit Trend Over Time',

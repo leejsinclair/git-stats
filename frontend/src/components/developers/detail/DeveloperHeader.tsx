@@ -5,6 +5,16 @@ interface DeveloperHeaderProps {
   onBack: () => void;
 }
 
+/**
+ * Displays the header section for a developer detail view with name, email, and total commits.
+ * 
+ * @param props - Component props
+ * @param props.name - Developer's display name
+ * @param props.email - Developer's email address
+ * @param props.totalCommits - Total number of commits made by the developer
+ * @param props.onBack - Callback to navigate back to the developers list
+ * @returns A header component with back button and developer information
+ */
 export function DeveloperHeader({ name, email, totalCommits, onBack }: DeveloperHeaderProps) {
   return (
     <div className="mb-6">

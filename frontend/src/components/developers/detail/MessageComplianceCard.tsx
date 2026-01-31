@@ -10,6 +10,17 @@ interface MessageComplianceCardProps {
   }>;
 }
 
+/**
+ * Displays commit message compliance metrics and common issues.
+ * 
+ * @param props - Component props
+ * @param props.passPercentage - Percentage of commits that pass validation
+ * @param props.averageScore - Average compliance score across all commits
+ * @param props.validMessages - Count of valid commit messages
+ * @param props.totalMessages - Total count of commit messages analyzed
+ * @param props.commonIssues - Array of common validation issues with counts
+ * @returns A card displaying message compliance statistics and issue breakdown
+ */
 export function MessageComplianceCard({ passPercentage, averageScore, validMessages, totalMessages, commonIssues }: MessageComplianceCardProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 border border-gray-200 dark:border-gray-700">

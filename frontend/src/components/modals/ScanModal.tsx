@@ -7,6 +7,16 @@ interface ScanModalProps {
   initialFolder?: string;
 }
 
+/**
+ * Modal dialog for scanning a folder to discover Git repositories.
+ * 
+ * @param props - Component props
+ * @param props.isOpen - Whether the modal is currently visible
+ * @param props.onClose - Callback to close the modal
+ * @param props.onScan - Async callback to scan a folder and analyze repositories
+ * @param props.initialFolder - Default folder path to scan
+ * @returns A modal component for repository scanning
+ */
 export function ScanModal({ isOpen, onClose, onScan, initialFolder = '/home/lee/projects' }: ScanModalProps) {
   const [scanFolder, setScanFolder] = useState(initialFolder);
   const [scanning, setScanning] = useState(false);

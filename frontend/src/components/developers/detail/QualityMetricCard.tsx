@@ -14,6 +14,18 @@ interface QualityMetricCardProps {
   helpText: string;
 }
 
+/**
+ * Displays a quality metric (documentation or test ratio) with color-coded status.
+ * 
+ * @param props - Component props
+ * @param props.title - Card title describing the metric
+ * @param props.icon - Emoji or icon to display with the title
+ * @param props.ratio - Percentage value of the metric
+ * @param props.thresholds - Threshold values for excellent and good ratings
+ * @param props.labels - Status labels for excellent, good, and poor ratings
+ * @param props.helpText - Helper text explaining what the metric measures
+ * @returns A card displaying a quality metric with color-coded status and help text
+ */
 export function QualityMetricCard({
   title,
   icon,

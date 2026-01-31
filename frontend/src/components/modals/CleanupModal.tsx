@@ -12,6 +12,16 @@ interface CleanupModalProps {
   cleanupInfo: CleanupInfo | null;
 }
 
+/**
+ * Modal dialog for cleaning up old analysis files that are no longer referenced.
+ * 
+ * @param props - Component props
+ * @param props.isOpen - Whether the modal is currently visible
+ * @param props.onClose - Callback to close the modal
+ * @param props.onConfirm - Async callback to confirm and execute the cleanup operation
+ * @param props.cleanupInfo - Information about files to be cleaned up (old vs current counts)
+ * @returns A modal component for file cleanup confirmation
+ */
 export function CleanupModal({ isOpen, onClose, onConfirm, cleanupInfo }: CleanupModalProps) {
   const [cleaning, setCleaning] = useState(false);
 

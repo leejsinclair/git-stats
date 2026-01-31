@@ -16,6 +16,14 @@ interface MonthlyActivityChartProps {
   title?: string;
 }
 
+/**
+ * Displays a bar chart showing monthly activity including commits and active authors.
+ * 
+ * @param props - Component props
+ * @param props.data - Array of monthly statistics with commits, authors, and files changed
+ * @param props.title - Optional custom chart title (defaults to 'Monthly Activity')
+ * @returns A bar chart component displaying monthly repository activity
+ */
 export function MonthlyActivityChart({
   data,
   title = 'Monthly Activity',

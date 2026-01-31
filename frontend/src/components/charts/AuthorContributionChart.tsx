@@ -14,6 +14,14 @@ interface AuthorContributionChartProps {
   title?: string;
 }
 
+/**
+ * Displays a bar chart showing the top 10 contributors by commit count.
+ * 
+ * @param props - Component props
+ * @param props.data - Object mapping author names to their commit counts
+ * @param props.title - Optional custom chart title (defaults to 'Author Contributions')
+ * @returns A bar chart component displaying author contributions
+ */
 export function AuthorContributionChart({
   data,
   title = 'Author Contributions',

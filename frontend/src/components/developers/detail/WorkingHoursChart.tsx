@@ -6,6 +6,14 @@ interface WorkingHoursChartProps {
   totalCommits: number;
 }
 
+/**
+ * Displays a pie chart and metrics showing when a developer commits (business hours, late night, weekends).
+ * 
+ * @param props - Component props
+ * @param props.analysis - Working hours analysis data with breakdowns by time period
+ * @param props.totalCommits - Total number of commits for calculating percentages
+ * @returns A card with pie chart and metrics showing working hours patterns with burnout warnings
+ */
 export function WorkingHoursChart({ analysis, totalCommits }: WorkingHoursChartProps) {
   const workingHoursData = [
     { period: 'Business Hours', commits: analysis.businessHoursCommits, color: '#10b981' },

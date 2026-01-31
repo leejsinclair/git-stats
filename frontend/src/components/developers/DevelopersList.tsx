@@ -7,6 +7,15 @@ interface DevelopersListProps {
   onDeveloperClick: (developer: DeveloperStats) => void;
 }
 
+/**
+ * Displays a grid of developer cards with loading and empty states.
+ * 
+ * @param props - Component props
+ * @param props.developers - Array of developer statistics to display
+ * @param props.loading - Whether the data is currently being loaded
+ * @param props.onDeveloperClick - Callback when a developer card is clicked
+ * @returns A responsive grid of developer cards or loading/empty state
+ */
 export function DevelopersList({ developers, loading, onDeveloperClick }: DevelopersListProps) {
   if (loading) {
     return (

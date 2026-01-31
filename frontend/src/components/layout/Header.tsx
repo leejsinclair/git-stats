@@ -3,6 +3,14 @@ interface HeaderProps {
   onCleanupClick: () => void;
 }
 
+/**
+ * Main application header with title and action buttons for scanning and cleanup.
+ * 
+ * @param props - Component props
+ * @param props.onScanClick - Callback when the "Scan Folder" button is clicked
+ * @param props.onCleanupClick - Callback when the "Cleanup" button is clicked
+ * @returns The application header with title and action buttons
+ */
 export function Header({ onScanClick, onCleanupClick }: HeaderProps) {
   return (
     <div className="mb-8 flex justify-between items-start">

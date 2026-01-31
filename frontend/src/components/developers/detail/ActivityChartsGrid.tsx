@@ -28,6 +28,16 @@ interface ActivityChartsGridProps {
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
 
+/**
+ * Displays a grid of activity charts showing commit patterns across time dimensions.
+ * 
+ * @param props - Component props
+ * @param props.dayOfWeekData - Commit counts grouped by day of week
+ * @param props.repoData - Commit counts per repository
+ * @param props.hourData - Commit counts by hour of day
+ * @param props.recentActivityData - Recent activity with commit and line change metrics
+ * @returns A responsive grid of bar, pie, and line charts showing developer activity patterns
+ */
 export function ActivityChartsGrid({ dayOfWeekData, repoData, hourData, recentActivityData }: ActivityChartsGridProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
