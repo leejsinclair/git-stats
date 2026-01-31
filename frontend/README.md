@@ -1,53 +1,121 @@
-# React + TypeScript + Vite
+# Git Statistics Dashboard - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React application for analyzing and visualizing Git repository statistics.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 📊 **Repository Analysis** - Analyze Git repositories and view commit statistics
+- 👥 **Developer Insights** - Track developer contributions and code quality metrics
+- 📈 **Data Visualization** - Interactive charts and graphs using Recharts
+- 🎨 **Modern UI** - Built with React 19, TypeScript, and Tailwind CSS
+- ✅ **Well Tested** - Comprehensive test coverage with Vitest
+- 📚 **Component Documentation** - Interactive Storybook documentation
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Development
 
-## Expanding the ESLint configuration
+```bash
+# Install dependencies
+npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Start development server
+npm run dev
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Run tests
+npm test
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# Run tests with UI
+npm run test:ui
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+# Check test coverage
+npm run test:coverage
+
+# Start Storybook
+npm run storybook
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Building
 
-```js
-// eslint.config.js
-import reactDom from 'eslint-plugin-react-dom';
+```bash
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Build Storybook
+npm run build-storybook
+```
+
+## Component Documentation
+
+View component documentation and examples in Storybook:
+
+```bash
+npm run storybook
+```
+
+Then open http://localhost:6006 in your browser.
+
+Components are organized into categories:
+- **Charts** - Data visualization components
+- **Developers** - Developer statistics components
+- **Layout** - Layout and navigation components
+- **Modals** - Dialog and modal components
+- **Repositories** - Repository management components
+
+See [.storybook/README.md](.storybook/README.md) for more details.
+
+## Testing
+
+This project uses Vitest and React Testing Library for testing.
+
+- Test files: `src/__tests__/*.test.tsx`
+- Test utilities: `src/test/`
+- Configuration: `vitest.config.ts`
+
+See [TESTING.md](TESTING.md) for detailed testing documentation.
+
+## Tech Stack
+
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Recharts** - Charting library
+- **Vitest** - Testing framework
+- **React Testing Library** - Component testing utilities
+- **Storybook** - Component documentation and development
+
+## Project Structure
+
+```
+frontend/
+├── .storybook/          # Storybook configuration
+├── public/              # Static assets
+├── src/
+│   ├── __tests__/       # Test files
+│   ├── components/      # React components
+│   │   ├── charts/      # Chart components
+│   │   ├── developers/  # Developer components
+│   │   ├── layout/      # Layout components
+│   │   ├── modals/      # Modal components
+│   │   └── repositories/# Repository components
+│   ├── stories/         # Storybook stories
+│   ├── test/            # Test utilities
+│   ├── api.ts           # API client
+│   ├── types.ts         # TypeScript types
+│   └── App.tsx          # Main application
+├── TESTING.md           # Testing documentation
+└── package.json
+```
 import reactX from 'eslint-plugin-react-x';
 
 export default defineConfig([
