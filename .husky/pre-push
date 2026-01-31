@@ -12,6 +12,10 @@ npm run coverage:badge
 # Run frontend tests with coverage
 echo "Running frontend tests with coverage..."
 cd frontend && npm run test:coverage -- --run && npm run coverage:badge || exit 1
+cd ..
+
+# Add coverage badges to the commit
+git add coverage-backend.svg frontend/coverage-frontend.svg 2>/dev/null || true
 
 echo "✓ All tests passed with coverage stats generated"
 echo "  Backend coverage: coverage/lcov.info (badge: coverage-backend.svg)"
