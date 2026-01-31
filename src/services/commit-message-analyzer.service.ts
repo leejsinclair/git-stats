@@ -48,27 +48,35 @@ export interface CommitMessageReport {
 export class CommitMessageAnalyzerService {
   private git: SimpleGit;
 
-  // Conventional Commits types
+  // Conventional Commits types - These are the standard types defined in the Conventional Commits specification
+  // See: https://www.conventionalcommits.org/
   private readonly conventionalTypes = [
-    'feat',
-    'fix',
-    'docs',
-    'style',
-    'refactor',
-    'perf',
-    'test',
-    'build',
-    'ci',
-    'chore',
-    'revert',
+    'feat', // New feature
+    'fix', // Bug fix
+    'docs', // Documentation changes
+    'style', // Code style/formatting (no logic change)
+    'refactor', // Code restructuring (no behavior change)
+    'perf', // Performance improvements
+    'test', // Adding or updating tests
+    'build', // Build system or dependency changes
+    'ci', // CI/CD configuration changes
+    'chore', // Maintenance tasks
+    'revert', // Reverting previous commits
   ];
 
-  // Rules configuration
-  private readonly rules = {
-    subjectMaxLength: 50,
-    bodyMaxLineLength: 72,
-    subjectMinLength: 10,
-  };
+  // Commit message length limits - Based on widely accepted Git commit best practices
+  // See: https://cbea.ms/git-commit/
+  private readonly SUBJECT_MAX_LENGTH = 50; // 50 chars is the sweet spot (visible in GitHub, git log --oneline)
+  private readonly SUBJECT_HARD_LIMIT = 72; // Absolute maximum before becoming an error
+  private readonly SUBJECT_MIN_LENGTH = 10; // Ensures commits are descriptive enough
+  private readonly BODY_MAX_LINE_LENGTH = 72; // 72 chars ensures readability in terminal and email clients
+
+  // Scoring thresholds and penalties
+  private readonly PASSING_SCORE_THRESHOLD = 70; // Minimum score to pass quality check
+  private readonly DEFAULT_COMMIT_LIMIT = 100; // Default number of commits to analyze
+  private readonly ERROR_PENALTY = 20; // Points deducted for error-level issues
+  private readonly WARNING_PENALTY = 10; // Points deducted for warning-level issues
+  private readonly INFO_PENALTY = 5; // Points deducted for info-level issues
 
   constructor(repoPath?: string) {
     this.git = simpleGit(repoPath || process.cwd());
@@ -88,7 +96,7 @@ export class CommitMessageAnalyzerService {
   ): Promise<CommitMessageReport> {
     this.git = simpleGit(repoPath);
 
-    const { limit = 100, since, until } = options;
+    const { limit = this.DEFAULT_COMMIT_LIMIT, since, until } = options;
 
     try {
       // Get commit log
@@ -146,8 +154,13 @@ export class CommitMessageAnalyzerService {
   ): CommitMessageAnalysis {
     const issues: CommitMessageIssue[] = [];
     const lines = message.split('\n');
-    const subject = lines[0] || '';
-    const body = lines.slice(2).join('\n').trim(); // Skip blank line after subject
+    const subject = lines[0] || ''; // First line is always the subject
+
+    // Extract body starting from line 3 (index 2) - proper commit format has:
+    // Line 1: Subject
+    // Line 2: Blank line (separator)
+    // Line 3+: Body text
+    const body = lines.slice(2).join('\n').trim();
 
     // Rule 1: Subject line should not be empty
     if (!subject.trim()) {
@@ -160,21 +173,23 @@ export class CommitMessageAnalyzerService {
     }
 
     // Rule 2: Subject line length (ideally <= 50 chars)
-    if (subject.length > this.rules.subjectMaxLength) {
+    // Subjects over 50 chars get a warning, over 72 chars get an error
+    // This is because 50 is optimal, but 72 is the hard limit where truncation occurs
+    if (subject.length > this.SUBJECT_MAX_LENGTH) {
       issues.push({
-        type: subject.length > 72 ? 'error' : 'warning',
+        type: subject.length > this.SUBJECT_HARD_LIMIT ? 'error' : 'warning',
         rule: 'subject-length',
-        message: `Subject line should be ${this.rules.subjectMaxLength} characters or less (currently ${subject.length})`,
+        message: `Subject line should be ${this.SUBJECT_MAX_LENGTH} characters or less (currently ${subject.length})`,
         line: 1,
       });
     }
 
     // Rule 3: Subject should be meaningful (at least 10 chars)
-    if (subject.trim().length < this.rules.subjectMinLength && subject.trim().length > 0) {
+    if (subject.trim().length < this.SUBJECT_MIN_LENGTH && subject.trim().length > 0) {
       issues.push({
         type: 'warning',
         rule: 'subject-min-length',
-        message: `Subject line should be at least ${this.rules.subjectMinLength} characters (currently ${subject.trim().length})`,
+        message: `Subject line should be at least ${this.SUBJECT_MIN_LENGTH} characters (currently ${subject.trim().length})`,
         line: 1,
       });
     }
@@ -190,6 +205,8 @@ export class CommitMessageAnalyzerService {
     }
 
     // Rule 5: Subject should start with a capital letter (unless using conventional commits)
+    // Conventional commits start with lowercase type (e.g., "feat:"), so we exempt them
+    // Check for both "type:" and "type(scope):" formats
     const isConventionalCommit = this.conventionalTypes.some(
       type =>
         subject.toLowerCase().startsWith(`${type}:`) || subject.toLowerCase().startsWith(`${type}(`)
@@ -224,11 +241,12 @@ export class CommitMessageAnalyzerService {
     if (body) {
       const bodyLines = body.split('\n');
       bodyLines.forEach((line, index) => {
-        if (line.length > this.rules.bodyMaxLineLength) {
+        if (line.length > this.BODY_MAX_LINE_LENGTH) {
+          // Add 3 to index because: line 1 = subject, line 2 = blank, body starts at line 3
           issues.push({
             type: 'info',
             rule: 'body-line-length',
-            message: `Body line ${index + 3} exceeds ${this.rules.bodyMaxLineLength} characters (${line.length})`,
+            message: `Body line ${index + 3} exceeds ${this.BODY_MAX_LINE_LENGTH} characters (${line.length})`,
             line: index + 3,
           });
         }
@@ -236,6 +254,8 @@ export class CommitMessageAnalyzerService {
     }
 
     // Rule 9: Avoid generic messages
+    // These patterns catch common lazy commit messages that don't provide meaningful context
+    // Examples: "wip", "fix", "update", "changed" - these tell us nothing about what actually changed
     const genericPatterns = [
       /^(wip|fix|update|change|minor|tmp|temp)$/i,
       /^(fixes?|updates?|changes?)$/i,
@@ -251,9 +271,11 @@ export class CommitMessageAnalyzerService {
       });
     }
 
-    // Calculate score (0-100)
+    // Calculate score (0-100) based on issue severity
     const score = this.calculateScore(issues);
-    const passed = score >= 70 && !issues.some(i => i.type === 'error');
+    // A commit "passes" if it scores at least 70/100 AND has no errors
+    // This allows minor warnings/info issues while enforcing critical rules
+    const passed = score >= this.PASSING_SCORE_THRESHOLD && !issues.some(i => i.type === 'error');
 
     return {
       hash,
@@ -275,6 +297,9 @@ export class CommitMessageAnalyzerService {
    * @returns True if the message looks like a Conventional Commit
    */
   private looksLikeConventionalCommit(subject: string): boolean {
+    // Matches: type(optional-scope): description
+    // Examples: "feat: add login", "fix(api): handle errors", "docs: update readme"
+    // Pattern breakdown: ^[a-z]+ = type, (\([a-z0-9-]+\))? = optional scope, : = separator
     return /^[a-z]+(\([a-z0-9-]+\))?:/i.test(subject);
   }
 
@@ -301,9 +326,11 @@ export class CommitMessageAnalyzerService {
       return issues;
     }
 
+    // Extract parts using destructuring - first element (full match) is ignored
+    // match[1] = type, match[2] = scope (with parens), match[3] = description
     const [, type, scope, description] = match;
 
-    // Validate type
+    // Validate type against known conventional types
     if (!this.conventionalTypes.includes(type.toLowerCase())) {
       issues.push({
         type: 'warning',
@@ -363,22 +390,27 @@ export class CommitMessageAnalyzerService {
    * @returns Score from 0 (poor) to 100 (excellent)
    */
   private calculateScore(issues: CommitMessageIssue[]): number {
-    let score = 100;
+    let score = 100; // Start perfect, deduct points for issues
 
+    // Apply penalties based on issue severity:
+    // - Errors are critical violations (e.g., empty subject) = -20 points
+    // - Warnings are important best practices (e.g., long subject) = -10 points
+    // - Info items are nice-to-have guidelines (e.g., capitalization) = -5 points
     issues.forEach(issue => {
       switch (issue.type) {
         case 'error':
-          score -= 20;
+          score -= this.ERROR_PENALTY;
           break;
         case 'warning':
-          score -= 10;
+          score -= this.WARNING_PENALTY;
           break;
         case 'info':
-          score -= 5;
+          score -= this.INFO_PENALTY;
           break;
       }
     });
 
+    // Ensure score never goes below 0
     return Math.max(0, score);
   }
 
@@ -408,6 +440,9 @@ export class CommitMessageAnalyzerService {
       'generic-message': 'Generic or vague commit message',
     };
 
+    // Convert violation counts to an array of rule summaries
+    // Sort by violation count (descending) to show most problematic rules first
+    // This helps teams prioritize which commit message issues to address
     return Object.entries(ruleCounts)
       .map(([rule, violations]) => ({
         rule,
