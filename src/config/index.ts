@@ -3,6 +3,10 @@ import path from 'path';
 
 dotenv.config();
 
+/**
+ * Application configuration loaded from environment variables.
+ * Provides paths for data storage, repository clones, and server settings.
+ */
 export const config = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -12,4 +16,7 @@ export const config = {
   maxConcurrentClones: parseInt(process.env.MAX_CONCURRENT_CLONES || '3', 10),
 };
 
+/**
+ * Type definition for application configuration.
+ */
 export type Config = typeof config;

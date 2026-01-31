@@ -5,7 +5,13 @@ import * as path from 'path';
 const router = Router();
 
 /**
- * Clean up old analysis files that are not in metadata.json
+ * POST /api/cleanup/old-files
+ * Deletes old analysis files that are no longer referenced in metadata.json.
+ * Helps clean up disk space by removing outdated analysis results.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @returns JSON response with count and list of deleted files
  */
 router.post('/old-files', async (req, res) => {
   try {
@@ -59,7 +65,13 @@ router.post('/old-files', async (req, res) => {
 });
 
 /**
- * Preview old analysis files that would be deleted
+ * GET /api/cleanup/old-files
+ * Previews old analysis files that would be deleted without actually deleting them.
+ * Useful for reviewing what cleanup will do before executing it.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @returns JSON response with details of old files
  */
 router.get('/old-files', async (req, res) => {
   try {

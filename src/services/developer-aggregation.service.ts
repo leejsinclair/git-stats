@@ -3,6 +3,9 @@ import * as path from 'path';
 
 import { CommitMessageAnalyzerService } from './commit-message-analyzer.service';
 
+/**
+ * Distribution of commit sizes categorized by lines changed.
+ */
 interface CommitSizeDistribution {
   tiny: number; // 1-10 lines
   small: number; // 11-50 lines
@@ -13,6 +16,9 @@ interface CommitSizeDistribution {
   medianLinesPerCommit: number;
 }
 
+/**
+ * Distribution of commit types following Conventional Commits specification.
+ */
 interface CommitTypeDistribution {
   feat: number;
   fix: number;
@@ -28,11 +34,17 @@ interface CommitTypeDistribution {
   bugFixRatio: number; // fix / total
 }
 
+/**
+ * Represents frequency of changes to a specific file.
+ */
 interface FileChurn {
   filePath: string;
   changes: number;
 }
 
+/**
+ * Analysis of developer working hours and patterns.
+ */
 interface WorkingHoursAnalysis {
   lateNightCommits: number; // 10 PM - 6 AM
   weekendCommits: number;
@@ -42,6 +54,9 @@ interface WorkingHoursAnalysis {
   preferredWorkingHours: string; // e.g., "morning", "afternoon", "evening", "night"
 }
 
+/**
+ * Core metrics for a developer's contributions.
+ */
 interface DeveloperMetrics {
   totalCommits: number;
   linesAdded: number;
@@ -52,6 +67,9 @@ interface DeveloperMetrics {
   testRatio: number; // test commits / total commits
 }
 
+/**
+ * Metrics for commit message quality and compliance with best practices.
+ */
 interface MessageComplianceMetrics {
   totalMessages: number;
   validMessages: number;
@@ -64,6 +82,9 @@ interface MessageComplianceMetrics {
   }>;
 }
 
+/**
+ * Activity statistics for a single day.
+ */
 interface RecentActivity {
   date: string;
   commits: number;
@@ -71,6 +92,9 @@ interface RecentActivity {
   linesRemoved: number;
 }
 
+/**
+ * Overall activity patterns for a developer.
+ */
 interface DeveloperActivity {
   totalDays: number;
   activeDays: number;
@@ -81,6 +105,9 @@ interface DeveloperActivity {
   recentActivity: RecentActivity[];
 }
 
+/**
+ * Represents a single commit with basic information.
+ */
 interface Commit {
   hash: string;
   message: string;
@@ -90,6 +117,9 @@ interface Commit {
   deletions: number;
 }
 
+/**
+ * Complete statistics and analysis for a single developer.
+ */
 export interface DeveloperStats {
   name: string;
   email: string;
@@ -103,16 +133,29 @@ export interface DeveloperStats {
   workingHoursAnalysis: WorkingHoursAnalysis;
 }
 
+/**
+ * Complete report containing statistics for all developers.
+ */
 export interface DeveloperReport {
   totalDevelopers: number;
   developers: DeveloperStats[];
   generatedAt: string;
 }
 
+/**
+ * Service for aggregating and analyzing developer statistics across multiple repositories.
+ * Provides comprehensive metrics including commit patterns, message compliance, and activity analysis.
+ */
 export class DeveloperAggregationService {
   private dataDir = path.join(process.cwd(), 'data', 'output');
   private messageAnalyzer = new CommitMessageAnalyzerService();
 
+  /**
+   * Aggregates statistics for all developers across analyzed repositories.
+   * Processes git stats files and commit message data to build comprehensive developer profiles.
+   *
+   * @returns Complete developer report with statistics for all contributors
+   */
   async aggregateDevelopers(): Promise<DeveloperReport> {
     const developerMap = new Map<string, DeveloperStats>();
 
@@ -328,6 +371,11 @@ export class DeveloperAggregationService {
     };
   }
 
+  /**
+   * Calculates activity metrics for a developer including commit patterns and timing.
+   *
+   * @param dev - Developer stats object to update with activity metrics
+   */
   private calculateActivityMetrics(dev: DeveloperStats): void {
     if (dev.recentCommits.length === 0) return;
 
@@ -588,6 +636,11 @@ export class DeveloperAggregationService {
   /**
    * Calculate documentation and test ratios
    */
+  /**
+   * Calculates the ratio of documentation and test-related commits.
+   *
+   * @param dev - Developer stats object to update with ratios
+   */
   private calculateDocumentationAndTestRatios(dev: DeveloperStats): void {
     if (dev.recentCommits.length === 0) return;
 
@@ -626,6 +679,12 @@ export class DeveloperAggregationService {
   /**
    * Get rule description for commit message rules
    */
+  /**
+   * Gets a human-readable description for a commit message rule.
+   *
+   * @param rule - Rule identifier
+   * @returns Human-readable description of the rule
+   */
   private getRuleDescription(rule: string): string {
     const descriptions: Record<string, string> = {
       'subject-empty': 'Subject line is empty',
@@ -647,6 +706,12 @@ export class DeveloperAggregationService {
     return descriptions[rule] || rule;
   }
 
+  /**
+   * Retrieves statistics for a specific developer by name.
+   *
+   * @param developerName - Name of the developer to find
+   * @returns Developer statistics or null if not found
+   */
   async getDeveloperStats(developerName: string): Promise<DeveloperStats | null> {
     const report = await this.aggregateDevelopers();
     return report.developers.find(d => d.name === developerName) || null;

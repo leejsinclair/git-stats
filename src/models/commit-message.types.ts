@@ -2,6 +2,9 @@
  * Types for commit message analysis
  */
 
+/**
+ * Represents a single issue found in a commit message.
+ */
 export interface CommitMessageIssue {
   type: 'error' | 'warning' | 'info';
   rule: string;
@@ -9,6 +12,9 @@ export interface CommitMessageIssue {
   line?: number;
 }
 
+/**
+ * Complete analysis result for a single commit message.
+ */
 export interface CommitMessageAnalysis {
   hash: string;
   author: string;
@@ -21,6 +27,9 @@ export interface CommitMessageAnalysis {
   issues: CommitMessageIssue[];
 }
 
+/**
+ * Summary report for commit message analysis across multiple commits.
+ */
 export interface CommitMessageReport {
   totalCommits: number;
   analyzedCommits: number;
@@ -34,6 +43,9 @@ export interface CommitMessageReport {
   }[];
 }
 
+/**
+ * Request payload for analyzing commit messages in a repository.
+ */
 export interface AnalyzeCommitMessagesRequest {
   repoPath: string;
   branch?: string;
@@ -42,6 +54,9 @@ export interface AnalyzeCommitMessagesRequest {
   until?: string;
 }
 
+/**
+ * Response payload for commit message analysis requests.
+ */
 export interface AnalyzeCommitMessagesResponse {
   success: boolean;
   data?: CommitMessageReport;

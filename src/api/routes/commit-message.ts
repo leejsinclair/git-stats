@@ -8,7 +8,14 @@ import { CommitMessageAnalyzerService } from '../../services/commit-message-anal
 
 export const commitMessageRouter = Router();
 
-// Analyze commit messages in a local repository
+/**
+ * POST /api/commit-messages/analyze
+ * Analyzes commit messages in a local repository for quality and compliance.
+ *
+ * @param req - Express request object with body containing repoPath, branch, limit, since, until
+ * @param res - Express response object
+ * @returns JSON response with commit message analysis results
+ */
 commitMessageRouter.post('/analyze', async (req: Request, res: Response) => {
   try {
     const { repoPath, branch, limit, since, until }: AnalyzeCommitMessagesRequest = req.body;
@@ -63,7 +70,14 @@ commitMessageRouter.post('/analyze', async (req: Request, res: Response) => {
   }
 });
 
-// Analyze commit messages in one of the previously cloned repos
+/**
+ * POST /api/commit-messages/analyze/repo/:repoName
+ * Analyzes commit messages in a previously cloned repository.
+ *
+ * @param req - Express request object with repoName parameter and optional query params
+ * @param res - Express response object
+ * @returns JSON response with commit message analysis results
+ */
 commitMessageRouter.post('/analyze/repo/:repoName', async (req: Request, res: Response) => {
   try {
     const { repoName } = req.params;
@@ -108,7 +122,14 @@ commitMessageRouter.post('/analyze/repo/:repoName', async (req: Request, res: Re
   }
 });
 
-// Get information about commit message best practices
+/**
+ * GET /api/commit-messages/best-practices
+ * Returns information about commit message best practices and guidelines.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @returns JSON response with best practices documentation
+ */
 commitMessageRouter.get('/best-practices', (req: Request, res: Response) => {
   res.json({
     success: true,

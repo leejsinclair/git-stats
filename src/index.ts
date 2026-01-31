@@ -24,12 +24,21 @@ app.use('/api/commit-messages', commitMessageRouter);
 app.use('/api/developers', developerRouter);
 app.use('/api/cleanup', cleanupRouter);
 
-// Health check endpoint
+/**
+ * GET /health
+ * Health check endpoint to verify the server is running.
+ *
+ * @returns JSON response with server status and timestamp
+ */
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Initialize metadata service and clear stuck 'analyzing' statuses
+/**
+ * Initialize the server by clearing any stuck 'analyzing' statuses.
+ * This ensures that repositories that were being analyzed when the server crashed
+ * are marked with an error status instead of staying in 'analyzing' state.
+ */
 const initializeServer = async () => {
   const metadataService = new MetadataService();
   await metadataService.clearAnalyzingStatus();

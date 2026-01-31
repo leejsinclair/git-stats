@@ -1,9 +1,10 @@
-import { Router, Request, Response } from 'express';
-import { GitService, RepoAnalysisResult } from '../../services/git.service';
-import { MetadataService } from '../../services/metadata.service';
-import { config } from '../../config';
-import path from 'path';
+import { Request, Response, Router } from 'express';
 import fs from 'fs-extra';
+import path from 'path';
+
+import { config } from '../../config';
+import { GitService } from '../../services/git.service';
+import { MetadataService } from '../../services/metadata.service';
 
 export const gitRouter = Router();
 const gitService = new GitService();
@@ -13,55 +14,66 @@ const metadataService = new MetadataService();
 fs.ensureDirSync(config.reposDir);
 fs.ensureDirSync(config.outputDir);
 
-// Analyze a remote repository
+/**
+ * POST /api/git/analyze/remote
+ * Analyzes a remote Git repository by cloning it first.
+ *
+ * @param req - Express request object with body containing repoUrl and optional branch
+ * @param res - Express response object
+ * @returns JSON response with analysis results and output file path
+ */
 gitRouter.post('/analyze/remote', async (req: Request, res: Response) => {
   try {
     const { repoUrl, branch = 'main' } = req.body;
-    
+
     if (!repoUrl) {
       return res.status(400).json({ error: 'Repository URL is required' });
     }
 
     // Create a safe directory name from the repo URL
-    const repoName = repoUrl.split('/').pop()?.replace(/\.git$/, '') || 'repository';
+    const repoName =
+      repoUrl
+        .split('/')
+        .pop()
+        ?.replace(/\.git$/, '') || 'repository';
     const localPath = path.join(config.reposDir, repoName);
-    
+
     // Mark as analyzing
     await metadataService.updateRepoStatus(localPath, 'analyzing', {
       repoName,
-      branch
+      branch,
     });
 
     try {
       // Clone or update the repository
       await gitService.cloneOrUpdateRepo(repoUrl, localPath);
-      
+
       // Analyze the repository
       const result = await gitService.analyzeRepository(localPath, branch);
-      
+
       // Save the analysis result
       const outputPath = path.join(config.outputDir, `${repoName}-analysis-${Date.now()}.json`);
       await fs.writeJson(outputPath, result, { spaces: 2 });
-      
+
       // Mark as ok
       await metadataService.updateRepoStatus(localPath, 'ok', {
         repoName,
         branch,
-        outputFile: outputPath
+        outputFile: outputPath,
       });
-      
+
       res.json({
         success: true,
         message: 'Remote repository analyzed successfully',
         data: result,
-        savedTo: outputPath
+        savedTo: outputPath,
       });
     } catch (error) {
       // Mark as error
       await metadataService.updateRepoStatus(localPath, 'error', {
         repoName,
         branch,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
     }
@@ -69,63 +81,70 @@ gitRouter.post('/analyze/remote', async (req: Request, res: Response) => {
     console.error('Error analyzing remote repository:', error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to analyze remote repository'
+      error: error instanceof Error ? error.message : 'Failed to analyze remote repository',
     });
   }
 });
 
-// Analyze a local repository
+/**
+ * POST /api/git/analyze/local
+ * Analyzes a local Git repository at the specified path.
+ *
+ * @param req - Express request object with body containing repoPath and optional branch
+ * @param res - Express response object
+ * @returns JSON response with analysis results and output file path
+ */
 gitRouter.post('/analyze/local', async (req: Request, res: Response) => {
   try {
     const { repoPath, branch = 'main' } = req.body;
-    
+
     if (!repoPath) {
       return res.status(400).json({ error: 'Local repository path is required' });
     }
 
     // Resolve to absolute path if relative path is provided
-    const absolutePath = path.isAbsolute(repoPath) 
-      ? repoPath 
+    const absolutePath = path.isAbsolute(repoPath)
+      ? repoPath
       : path.resolve(process.cwd(), repoPath);
-    
+
     const repoName = path.basename(absolutePath);
-    
+
     // Mark as analyzing
     await metadataService.updateRepoStatus(absolutePath, 'analyzing', {
       repoName,
-      branch
+      branch,
     });
 
     try {
       // Setup local repository
       await gitService.setupLocalRepo(absolutePath);
-      
+
       // Analyze the repository
       const result = await gitService.analyzeRepository(absolutePath, branch);
-      
+
       // Save the analysis result
       const outputPath = path.join(config.outputDir, `${repoName}-analysis-${Date.now()}.json`);
       await fs.writeJson(outputPath, result, { spaces: 2 });
-      
+
       // Mark as ok
       await metadataService.updateRepoStatus(absolutePath, 'ok', {
         repoName,
         branch,
-        outputFile: outputPath
+        outputFile: outputPath,
       });
-      
+
       res.json({
         success: true,
         message: 'Local repository analyzed successfully',
         data: result,
-        savedTo: outputPath
+        savedTo: outputPath,
       });
     } catch (error) {
       // Mark as error
       await metadataService.updateRepoStatus(absolutePath, 'error', {
         repoName,
         branch,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
     }
@@ -133,95 +152,102 @@ gitRouter.post('/analyze/local', async (req: Request, res: Response) => {
     console.error('Error analyzing repository:', error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to analyze repository'
+      error: error instanceof Error ? error.message : 'Failed to analyze repository',
     });
   }
 });
 
-// Scan folder for git repositories and analyze them
+/**
+ * POST /api/git/analyze/folder
+ * Scans a folder for Git repositories and analyzes each one found.
+ *
+ * @param req - Express request object with body containing folderPath, maxDepth, branch, and saveResults
+ * @param res - Express response object
+ * @returns JSON response with analysis results for all found repositories
+ */
 gitRouter.post('/analyze/folder', async (req: Request, res: Response) => {
   try {
     const { folderPath, maxDepth = 3, branch = 'main', saveResults = true } = req.body;
-    
+
     if (!folderPath) {
       return res.status(400).json({ error: 'Folder path is required' });
     }
 
     // Resolve to absolute path if relative path is provided
-    const absolutePath = path.isAbsolute(folderPath) 
-      ? folderPath 
+    const absolutePath = path.isAbsolute(folderPath)
+      ? folderPath
       : path.resolve(process.cwd(), folderPath);
-    
+
     // Scan for git repositories
     const foundRepos = await gitService.scanFolderForRepos(absolutePath, maxDepth);
-    
+
     if (foundRepos.length === 0) {
       return res.json({
         success: true,
         message: 'No git repositories found',
         foundRepos: 0,
-        results: []
+        results: [],
       });
     }
 
     // Analyze each repository
     const results = [];
     const errors = [];
-    
+
     for (const repoPath of foundRepos) {
       const repoName = path.basename(repoPath);
-      
+
       // Mark as analyzing
       await metadataService.updateRepoStatus(repoPath, 'analyzing', {
         repoName,
-        branch
+        branch,
       });
 
       try {
         await gitService.setupLocalRepo(repoPath);
         const result = await gitService.analyzeRepository(repoPath, branch);
-        
+
         if (saveResults) {
           const outputPath = path.join(config.outputDir, `${repoName}-analysis-${Date.now()}.json`);
           await fs.writeJson(outputPath, result, { spaces: 2 });
-          
+
           // Mark as ok
           await metadataService.updateRepoStatus(repoPath, 'ok', {
             repoName,
             branch,
-            outputFile: outputPath
+            outputFile: outputPath,
           });
-          
+
           results.push({
             repoPath,
             analysis: result,
-            savedTo: outputPath
+            savedTo: outputPath,
           });
         } else {
           // Mark as ok
           await metadataService.updateRepoStatus(repoPath, 'ok', {
             repoName,
-            branch
+            branch,
           });
-          
+
           results.push({
             repoPath,
-            analysis: result
+            analysis: result,
           });
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        
+
         // Mark as error
         await metadataService.updateRepoStatus(repoPath, 'error', {
           repoName,
           branch,
-          error: errorMessage
+          error: errorMessage,
         });
-        
+
         errors.push({
           repoPath,
-          error: errorMessage
+          error: errorMessage,
         });
       }
     }
@@ -233,40 +259,52 @@ gitRouter.post('/analyze/folder', async (req: Request, res: Response) => {
       successfulAnalysis: results.length,
       failedAnalysis: errors.length,
       results,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     });
-    
   } catch (error) {
     console.error('Error scanning folder for repositories:', error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to scan folder'
+      error: error instanceof Error ? error.message : 'Failed to scan folder',
     });
   }
 });
 
-// Get repository info
+/**
+ * GET /api/git/info
+ * Retrieves information about a Git repository (branches, remotes, etc.).
+ *
+ * @param req - Express request object with query parameter repoPath
+ * @param res - Express response object
+ * @returns JSON response with repository information
+ */
 gitRouter.get('/info', async (req: Request, res: Response) => {
   try {
     const { repoPath } = req.query;
-    
+
     if (typeof repoPath !== 'string') {
       return res.status(400).json({ error: 'Repository path is required' });
     }
-    
+
     const info = await gitService.getRepositoryInfo(repoPath);
     res.json(info);
-    
   } catch (error) {
     console.error('Error getting repository info:', error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to get repository info'
+      error: error instanceof Error ? error.message : 'Failed to get repository info',
     });
   }
 });
 
-// List available repositories
+/**
+ * GET /api/git/repos
+ * Lists all cloned repositories in the repos directory.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @returns JSON response with list of available repositories
+ */
 gitRouter.get('/repos', async (req: Request, res: Response) => {
   try {
     const repos = await fs.readdir(config.reposDir, { withFileTypes: true });
@@ -274,80 +312,101 @@ gitRouter.get('/repos', async (req: Request, res: Response) => {
       .filter(dirent => dirent.isDirectory())
       .map(dirent => ({
         name: dirent.name,
-        path: path.join(config.reposDir, dirent.name)
+        path: path.join(config.reposDir, dirent.name),
       }));
-    
+
     res.json({
       success: true,
-      data: repoList
+      data: repoList,
     });
-    
   } catch (error) {
     console.error('Error listing repositories:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to list repositories'
+      error: 'Failed to list repositories',
     });
   }
 });
 
-// Get metadata for all analyzed repositories
+/**
+ * GET /api/git/metadata
+ * Returns metadata about all analyzed repositories.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @returns JSON response with repository metadata
+ */
 gitRouter.get('/metadata', async (req: Request, res: Response) => {
   try {
     const metadata = await metadataService.readMetadata();
     res.json({
       success: true,
-      data: metadata
+      data: metadata,
     });
   } catch (error) {
     console.error('Error reading metadata:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to read metadata'
+      error: 'Failed to read metadata',
     });
   }
 });
 
-// Get metadata for repositories by status
+/**
+ * GET /api/git/metadata/status/:status
+ * Returns metadata for repositories filtered by status (ok, error, or analyzing).
+ *
+ * @param req - Express request object with status parameter
+ * @param res - Express response object
+ * @returns JSON response with filtered repository metadata
+ */
 gitRouter.get('/metadata/status/:status', async (req: Request, res: Response) => {
   try {
     const { status } = req.params;
-    
+
     if (!['ok', 'error', 'analyzing'].includes(status)) {
-      return res.status(400).json({ 
-        error: 'Invalid status. Must be one of: ok, error, analyzing' 
+      return res.status(400).json({
+        error: 'Invalid status. Must be one of: ok, error, analyzing',
       });
     }
-    
+
     const repos = await metadataService.getReposByStatus(status as 'ok' | 'error' | 'analyzing');
     res.json({
       success: true,
       status,
       count: repos.length,
-      data: repos
+      data: repos,
     });
   } catch (error) {
     console.error('Error reading metadata by status:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to read metadata'
+      error: 'Failed to read metadata',
     });
   }
 });
 
-// Clear any stuck 'analyzing' statuses (useful on server restart)
+/**
+ * POST /api/git/metadata/clear-analyzing
+ * Clears any repositories stuck in 'analyzing' status.
+ * Useful for recovery after server crashes.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @returns JSON response confirming the operation
+ */
 gitRouter.post('/metadata/clear-analyzing', async (req: Request, res: Response) => {
   try {
     await metadataService.clearAnalyzingStatus();
     res.json({
       success: true,
-      message: 'Cleared analyzing statuses'
+      message: 'Cleared analyzing statuses',
     });
   } catch (error) {
     console.error('Error clearing analyzing status:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to clear analyzing statuses'
+      error: 'Failed to clear analyzing statuses',
     });
   }
 });

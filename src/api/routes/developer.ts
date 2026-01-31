@@ -5,7 +5,14 @@ import { DeveloperAggregationService } from '../../services/developer-aggregatio
 export const developerRouter = Router();
 const developerService = new DeveloperAggregationService();
 
-// Get aggregated developer statistics
+/**
+ * GET /api/developers/stats
+ * Returns aggregated statistics for all developers across all analyzed repositories.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @returns JSON response with developer statistics report
+ */
 developerRouter.get('/stats', async (req: Request, res: Response) => {
   try {
     const report = await developerService.aggregateDevelopers();
@@ -23,7 +30,14 @@ developerRouter.get('/stats', async (req: Request, res: Response) => {
   }
 });
 
-// Get stats for a specific developer
+/**
+ * GET /api/developers/stats/:developerName
+ * Returns statistics for a specific developer.
+ *
+ * @param req - Express request object with developerName parameter
+ * @param res - Express response object
+ * @returns JSON response with developer statistics or 404 if not found
+ */
 developerRouter.get('/stats/:developerName', async (req: Request, res: Response) => {
   try {
     const { developerName } = req.params;

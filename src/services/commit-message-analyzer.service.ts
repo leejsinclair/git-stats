@@ -1,5 +1,8 @@
 import simpleGit, { SimpleGit } from 'simple-git';
 
+/**
+ * Represents a single issue found in a commit message.
+ */
 export interface CommitMessageIssue {
   type: 'error' | 'warning' | 'info';
   rule: string;
@@ -7,6 +10,9 @@ export interface CommitMessageIssue {
   line?: number;
 }
 
+/**
+ * Complete analysis result for a single commit message.
+ */
 export interface CommitMessageAnalysis {
   hash: string;
   author: string;
@@ -19,6 +25,9 @@ export interface CommitMessageAnalysis {
   issues: CommitMessageIssue[];
 }
 
+/**
+ * Summary report for commit message analysis across multiple commits.
+ */
 export interface CommitMessageReport {
   totalCommits: number;
   analyzedCommits: number;
@@ -32,6 +41,10 @@ export interface CommitMessageReport {
   }[];
 }
 
+/**
+ * Service for analyzing commit messages for quality and compliance with best practices.
+ * Supports Conventional Commits specification and general commit message guidelines.
+ */
 export class CommitMessageAnalyzerService {
   private git: SimpleGit;
 
@@ -256,14 +269,21 @@ export class CommitMessageAnalyzerService {
   }
 
   /**
-   * Check if commit message looks like it's trying to use Conventional Commits
+   * Checks if a commit message appears to follow Conventional Commits format.
+   *
+   * @param subject - Commit subject line to check
+   * @returns True if the message looks like a Conventional Commit
    */
   private looksLikeConventionalCommit(subject: string): boolean {
     return /^[a-z]+(\([a-z0-9-]+\))?:/i.test(subject);
   }
 
   /**
-   * Validate Conventional Commits format
+   * Validates a Conventional Commits formatted message.
+   * Checks type, scope, and description for proper formatting.
+   *
+   * @param subject - Commit subject line to validate
+   * @returns Array of issues found in the conventional commit format
    */
   private validateConventionalCommit(subject: string): CommitMessageIssue[] {
     const issues: CommitMessageIssue[] = [];
@@ -337,7 +357,10 @@ export class CommitMessageAnalyzerService {
   }
 
   /**
-   * Calculate score based on issues
+   * Calculates a quality score (0-100) based on issues found.
+   *
+   * @param issues - Array of issues found in the commit message
+   * @returns Score from 0 (poor) to 100 (excellent)
    */
   private calculateScore(issues: CommitMessageIssue[]): number {
     let score = 100;
@@ -360,7 +383,10 @@ export class CommitMessageAnalyzerService {
   }
 
   /**
-   * Generate summary of rule violations
+   * Generates a summary of rule violations across all analyzed commits.
+   *
+   * @param ruleCounts - Record of rule violation counts
+   * @returns Sorted array of rules with violation counts and descriptions
    */
   private generateRulesSummary(
     ruleCounts: Record<string, number>

@@ -1,8 +1,10 @@
-import simpleGit, { SimpleGit, SimpleGitOptions } from "simple-git";
-import * as fs from "fs-extra";
-import * as path from "path";
-import { config } from "../config";
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 
+/**
+ * Represents statistics for a single commit.
+ */
 export interface CommitStats {
   hash: string;
   author: string;
@@ -14,6 +16,9 @@ export interface CommitStats {
   files: number;
 }
 
+/**
+ * Represents aggregated statistics for a single week.
+ */
 export interface WeeklyStats {
   weekStart: string; // ISO week start date (Monday)
   weekNumber: number;
@@ -26,6 +31,9 @@ export interface WeeklyStats {
   commitHashes: string[];
 }
 
+/**
+ * Represents aggregated statistics for a single month.
+ */
 export interface MonthlyStats {
   month: string; // YYYY-MM format
   commits: number;
@@ -36,6 +44,9 @@ export interface MonthlyStats {
   weeks: WeeklyStats[];
 }
 
+/**
+ * Represents aggregated statistics for a single year.
+ */
 export interface YearlyStats {
   year: number;
   commits: number;
@@ -46,6 +57,10 @@ export interface YearlyStats {
   months: MonthlyStats[];
 }
 
+/**
+ * Complete analysis result for a Git repository.
+ * Contains commit statistics, author information, and time-based aggregations.
+ */
 export interface RepoAnalysisResult {
   repoName: string;
   branch: string;
@@ -69,19 +84,29 @@ export interface RepoAnalysisResult {
   recentCommits: CommitStats[]; // Only last 100 commits in detail
 }
 
+/**
+ * Service for analyzing Git repositories and extracting commit statistics.
+ * Provides methods to clone, update, and analyze repositories.
+ */
 export class GitService {
   private git: SimpleGit;
 
   constructor() {
     const options: Partial<SimpleGitOptions> = {
       baseDir: process.cwd(),
-      binary: "git",
+      binary: 'git',
       maxConcurrentProcesses: 6,
       trimmed: false,
     };
     this.git = simpleGit(options);
   }
 
+  /**
+   * Sets up a local repository for analysis by verifying it exists and is a valid Git repository.
+   *
+   * @param localPath - Absolute path to the local repository
+   * @throws {Error} If directory does not exist or is not a Git repository
+   */
   async setupLocalRepo(localPath: string): Promise<void> {
     try {
       if (!(await fs.pathExists(localPath))) {
@@ -96,12 +121,18 @@ export class GitService {
 
       this.git = simpleGit(localPath);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new Error(`Failed to setup local repository: ${errorMessage}`);
     }
   }
 
+  /**
+   * Clones a remote repository or updates it if it already exists locally.
+   *
+   * @param repoUrl - URL of the remote Git repository
+   * @param localPath - Local path where the repository should be cloned
+   * @throws {Error} If clone or update operation fails
+   */
   async cloneOrUpdateRepo(repoUrl: string, localPath: string): Promise<void> {
     try {
       if (await fs.pathExists(localPath)) {
@@ -115,16 +146,21 @@ export class GitService {
         this.git = simpleGit(localPath);
       }
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new Error(`Failed to clone/update repository: ${errorMessage}`);
     }
   }
 
-  async analyzeRepository(
-    repoPath: string,
-    branch: string = "main"
-  ): Promise<RepoAnalysisResult> {
+  /**
+   * Analyzes a Git repository and extracts comprehensive commit statistics.
+   * Processes all commits and aggregates data by week, month, and year.
+   *
+   * @param repoPath - Absolute path to the Git repository
+   * @param branch - Git branch to analyze (defaults to 'main')
+   * @returns Repository analysis data including commits, authors, and aggregated stats
+   * @throws {Error} If repository cannot be accessed or analyzed
+   */
+  async analyzeRepository(repoPath: string, branch: string = 'main'): Promise<RepoAnalysisResult> {
     try {
       this.git = simpleGit(repoPath);
 
@@ -138,21 +174,23 @@ export class GitService {
       try {
         log = await this.git.log({
           format: {
-            hash: "%H",
-            author: "%an",
-            email: "%ae",
-            date: "%aI",
-            message: "%s",
+            hash: '%H',
+            author: '%an',
+            email: '%ae',
+            date: '%aI',
+            message: '%s',
           },
-          "--stat": "4096", // Get diff stats
-          "--no-merges": null, // Exclude merge commits
+          '--stat': '4096', // Get diff stats
+          '--no-merges': null, // Exclude merge commits
         });
       } catch (error) {
         // Repository has no commits yet
-        const errorMessage = error instanceof Error ? error.message : "";
-        if (errorMessage.includes("does not have any commits yet") || 
-            errorMessage.includes("your current branch") ||
-            errorMessage.includes("bad default revision")) {
+        const errorMessage = error instanceof Error ? error.message : '';
+        if (
+          errorMessage.includes('does not have any commits yet') ||
+          errorMessage.includes('your current branch') ||
+          errorMessage.includes('bad default revision')
+        ) {
           return {
             repoName: path.basename(repoPath),
             branch,
@@ -196,9 +234,7 @@ export class GitService {
         // Skip diff for the first commit as it has no parent
         if (index < log.all.length - 1) {
           try {
-            const diff = await this.git.diffSummary([
-              `${commit.hash}~1..${commit.hash}`,
-            ]);
+            const diff = await this.git.diffSummary([`${commit.hash}~1..${commit.hash}`]);
             stats = {
               insertions: diff.insertions,
               deletions: diff.deletions,
@@ -207,7 +243,7 @@ export class GitService {
           } catch (error) {
             console.warn(
               `Could not get diff for commit ${commit.hash}:`,
-              error instanceof Error ? error.message : "Unknown error"
+              error instanceof Error ? error.message : 'Unknown error'
             );
           }
         }
@@ -232,9 +268,8 @@ export class GitService {
 
       // Track author contributions
       const authorContribution: Record<string, number> = {};
-      commits.forEach((commit) => {
-        authorContribution[commit.author] =
-          (authorContribution[commit.author] || 0) + 1;
+      commits.forEach(commit => {
+        authorContribution[commit.author] = (authorContribution[commit.author] || 0) + 1;
       });
 
       // Build aggregations
@@ -259,13 +294,18 @@ export class GitService {
         recentCommits: commits.slice(0, 100), // Keep only last 100 commits in detail
       };
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      console.error("Error in analyzeRepository:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in analyzeRepository:', error);
       throw new Error(`Repository analysis failed: ${errorMessage}`);
     }
   }
 
+  /**
+   * Calculates the start of the week (Monday) for a given date.
+   *
+   * @param date - Date to calculate week start for
+   * @returns Date object representing the Monday of that week
+   */
   private getWeekStart(date: Date): Date {
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
@@ -275,6 +315,12 @@ export class GitService {
     return weekStart;
   }
 
+  /**
+   * Calculates the ISO week number for a given date.
+   *
+   * @param date - Date to calculate ISO week number for
+   * @returns ISO week number (1-53)
+   */
   private getISOWeek(date: Date): number {
     const target = new Date(date.valueOf());
     const dayNumber = (date.getDay() + 6) % 7;
@@ -282,11 +328,18 @@ export class GitService {
     const firstThursday = target.valueOf();
     target.setMonth(0, 1);
     if (target.getDay() !== 4) {
-      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+      target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
     }
     return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
   }
 
+  /**
+   * Builds weekly, monthly, and yearly aggregations from commit data.
+   * Creates nested structures where weeks are grouped into months, and months into years.
+   *
+   * @param commits - Array of commit statistics to aggregate
+   * @returns Aggregated statistics organized by time periods
+   */
   private buildAggregations(commits: CommitStats[]): {
     yearly: YearlyStats[];
     monthly: MonthlyStats[];
@@ -375,25 +428,35 @@ export class GitService {
     }
 
     // Build nested structure: weeks into months, months into years
-    const weekly = Array.from(weeklyMap.values()).sort((a, b) => 
+    const weekly = Array.from(weeklyMap.values()).sort((a, b) =>
       a.weekStart.localeCompare(b.weekStart)
     );
 
-    const monthly = Array.from(monthlyMap.values()).map(month => {
-      // Find weeks that belong to this month
-      const monthWeeks = weekly.filter(week => week.weekStart.startsWith(month.month));
-      return { ...month, weeks: monthWeeks };
-    }).sort((a, b) => a.month.localeCompare(b.month));
+    const monthly = Array.from(monthlyMap.values())
+      .map(month => {
+        // Find weeks that belong to this month
+        const monthWeeks = weekly.filter(week => week.weekStart.startsWith(month.month));
+        return { ...month, weeks: monthWeeks };
+      })
+      .sort((a, b) => a.month.localeCompare(b.month));
 
-    const yearly = Array.from(yearlyMap.values()).map(year => {
-      // Find months that belong to this year
-      const yearMonths = monthly.filter(month => month.month.startsWith(String(year.year)));
-      return { ...year, months: yearMonths };
-    }).sort((a, b) => a.year - b.year);
+    const yearly = Array.from(yearlyMap.values())
+      .map(year => {
+        // Find months that belong to this year
+        const yearMonths = monthly.filter(month => month.month.startsWith(String(year.year)));
+        return { ...year, months: yearMonths };
+      })
+      .sort((a, b) => a.year - b.year);
 
     return { yearly, monthly, weekly };
   }
 
+  /**
+   * Retrieves basic information about a Git repository.
+   *
+   * @param repoPath - Absolute path to the repository
+   * @returns Object containing branches, remotes, and repo validity status
+   */
   async getRepositoryInfo(repoPath: string): Promise<{
     branches: string[];
     remotes: string[];
@@ -408,7 +471,7 @@ export class GitService {
       }
 
       const branches = (await this.git.branchLocal()).all;
-      const remotes = (await this.git.getRemotes()).map((r) => r.name);
+      const remotes = (await this.git.getRemotes()).map(r => r.name);
 
       return { branches, remotes, isRepo: true };
     } catch (error) {
@@ -416,16 +479,18 @@ export class GitService {
     }
   }
 
-  async scanFolderForRepos(
-    folderPath: string,
-    maxDepth: number = 3
-  ): Promise<string[]> {
+  /**
+   * Recursively scans a folder for Git repositories up to a maximum depth.
+   *
+   * @param folderPath - Path to the folder to scan
+   * @param maxDepth - Maximum depth to scan (defaults to 3)
+   * @returns Array of paths to found Git repositories
+   * @throws {Error} If folder does not exist
+   */
+  async scanFolderForRepos(folderPath: string, maxDepth: number = 3): Promise<string[]> {
     const foundRepos: string[] = [];
 
-    const scanDirectory = async (
-      currentPath: string,
-      currentDepth: number
-    ): Promise<void> => {
+    const scanDirectory = async (currentPath: string, currentDepth: number): Promise<void> => {
       if (currentDepth > maxDepth) {
         return;
       }
@@ -441,7 +506,7 @@ export class GitService {
 
         // If not a repo, scan subdirectories
         const entries = await fs.readdir(currentPath, { withFileTypes: true });
-        
+
         for (const entry of entries) {
           if (entry.isDirectory() && !entry.name.startsWith('.')) {
             const subPath = path.join(currentPath, entry.name);
@@ -450,7 +515,10 @@ export class GitService {
         }
       } catch (error) {
         // Skip directories we can't access
-        console.warn(`Could not scan ${currentPath}:`, error instanceof Error ? error.message : 'Unknown error');
+        console.warn(
+          `Could not scan ${currentPath}:`,
+          error instanceof Error ? error.message : 'Unknown error'
+        );
       }
     };
 
