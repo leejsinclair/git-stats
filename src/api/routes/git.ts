@@ -10,6 +10,22 @@ export const gitRouter = Router();
 const gitService = new GitService();
 const metadataService = new MetadataService();
 
+type FolderScanStatus = 'scanning' | 'analyzing' | 'complete' | 'error';
+
+interface FolderScanProgress {
+  scanId: string;
+  status: FolderScanStatus;
+  currentFolder: string | null;
+  scannedCount: number;
+  foundRepos: number;
+  successfulAnalysis: number;
+  failedAnalysis: number;
+  message?: string;
+  error?: string;
+}
+
+const folderScanJobs = new Map<string, FolderScanProgress>();
+
 // Ensure data directories exist
 fs.ensureDirSync(config.reposDir);
 fs.ensureDirSync(config.outputDir);
@@ -268,6 +284,167 @@ gitRouter.post('/analyze/folder', async (req: Request, res: Response) => {
       error: error instanceof Error ? error.message : 'Failed to scan folder',
     });
   }
+});
+
+/**
+ * POST /api/git/analyze/folder/async
+ * Starts a folder scan and analysis job and returns a scan id for progress polling.
+ *
+ * @param req - Express request object with body containing folderPath, maxDepth, branch, and saveResults
+ * @param res - Express response object
+ * @returns JSON response with scan id
+ */
+gitRouter.post('/analyze/folder/async', async (req: Request, res: Response) => {
+  try {
+    const { folderPath, maxDepth = 3, branch = 'main', saveResults = true } = req.body;
+
+    if (!folderPath) {
+      return res.status(400).json({ error: 'Folder path is required' });
+    }
+
+    const absolutePath = path.isAbsolute(folderPath)
+      ? folderPath
+      : path.resolve(process.cwd(), folderPath);
+
+    const scanId = `scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const progress: FolderScanProgress = {
+      scanId,
+      status: 'scanning',
+      currentFolder: null,
+      scannedCount: 0,
+      foundRepos: 0,
+      successfulAnalysis: 0,
+      failedAnalysis: 0,
+    };
+
+    folderScanJobs.set(scanId, progress);
+
+    res.json({ success: true, scanId });
+
+    void (async () => {
+      try {
+        const foundRepos = await gitService.scanFolderForRepos(
+          absolutePath,
+          maxDepth,
+          (currentPath, scannedCount) => {
+            progress.currentFolder = currentPath;
+            progress.scannedCount = scannedCount;
+          }
+        );
+
+        progress.foundRepos = foundRepos.length;
+
+        if (foundRepos.length === 0) {
+          progress.status = 'complete';
+          progress.message = 'No git repositories found';
+          progress.currentFolder = null;
+          return;
+        }
+
+        progress.status = 'analyzing';
+
+        const results = [];
+        const errors = [];
+
+        for (const repoPath of foundRepos) {
+          const repoName = path.basename(repoPath);
+          progress.currentFolder = repoPath;
+
+          await metadataService.updateRepoStatus(repoPath, 'analyzing', {
+            repoName,
+            branch,
+          });
+
+          try {
+            await gitService.setupLocalRepo(repoPath);
+            const result = await gitService.analyzeRepository(repoPath, branch);
+
+            if (saveResults) {
+              const outputPath = path.join(
+                config.outputDir,
+                `${repoName}-analysis-${Date.now()}.json`
+              );
+              await fs.writeJson(outputPath, result, { spaces: 2 });
+
+              await metadataService.updateRepoStatus(repoPath, 'ok', {
+                repoName,
+                branch,
+                outputFile: outputPath,
+              });
+
+              results.push({
+                repoPath,
+                analysis: result,
+                savedTo: outputPath,
+              });
+            } else {
+              await metadataService.updateRepoStatus(repoPath, 'ok', {
+                repoName,
+                branch,
+              });
+
+              results.push({
+                repoPath,
+                analysis: result,
+              });
+            }
+
+            progress.successfulAnalysis += 1;
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+            await metadataService.updateRepoStatus(repoPath, 'error', {
+              repoName,
+              branch,
+              error: errorMessage,
+            });
+
+            errors.push({ repoPath, error: errorMessage });
+            progress.failedAnalysis += 1;
+          }
+        }
+
+        progress.status = 'complete';
+        progress.currentFolder = null;
+        progress.message = `Found and analyzed ${results.length} repositories`;
+      } catch (error) {
+        progress.status = 'error';
+        progress.currentFolder = null;
+        progress.error = error instanceof Error ? error.message : 'Failed to scan folder';
+      }
+    })();
+  } catch (error) {
+    console.error('Error starting folder scan:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to start folder scan',
+    });
+  }
+});
+
+/**
+ * GET /api/git/analyze/folder/progress/:scanId
+ * Retrieves progress for a running or completed folder scan job.
+ *
+ * @param req - Express request object with scanId parameter
+ * @param res - Express response object
+ * @returns JSON response with progress details
+ */
+gitRouter.get('/analyze/folder/progress/:scanId', async (req: Request, res: Response) => {
+  const { scanId } = req.params;
+  const progress = folderScanJobs.get(scanId);
+
+  if (!progress) {
+    return res.status(404).json({
+      success: false,
+      error: 'Scan not found',
+    });
+  }
+
+  return res.json({
+    success: true,
+    data: progress,
+  });
 });
 
 /**

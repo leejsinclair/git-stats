@@ -190,4 +190,73 @@ describe('Git API Routes', () => {
       }
     });
   });
+
+  describe('POST /api/git/analyze/folder/async', () => {
+    it('should validate required fields', async () => {
+      const response = await request(app)
+        .post('/api/git/analyze/folder/async')
+        .send({})
+        .expect('Content-Type', /json/)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toContain('required');
+    });
+
+    it('should return a scan id for async folder scan', async () => {
+      const response = await request(app)
+        .post('/api/git/analyze/folder/async')
+        .send({
+          folderPath: '/tmp/test-repos',
+          maxDepth: 2,
+          branch: 'main',
+          saveResults: false,
+        })
+        .expect('Content-Type', /json/);
+
+      if (response.status === 200) {
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body).toHaveProperty('scanId');
+        expect(typeof response.body.scanId).toBe('string');
+      }
+    });
+  });
+
+  describe('GET /api/git/analyze/folder/progress/:scanId', () => {
+    it('should return 404 for non-existent scan id', async () => {
+      const response = await request(app)
+        .get('/api/git/analyze/folder/progress/nonexistent-scan-id')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('success', false);
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should return progress for existing scan id', async () => {
+      // First start a scan
+      const startResponse = await request(app).post('/api/git/analyze/folder/async').send({
+        folderPath: '/tmp/test-repos',
+        maxDepth: 1,
+        branch: 'main',
+        saveResults: false,
+      });
+
+      if (startResponse.status === 200 && startResponse.body.scanId) {
+        const scanId = startResponse.body.scanId;
+
+        const progressResponse = await request(app)
+          .get(`/api/git/analyze/folder/progress/${scanId}`)
+          .expect('Content-Type', /json/)
+          .expect(200);
+
+        expect(progressResponse.body).toHaveProperty('success', true);
+        expect(progressResponse.body).toHaveProperty('data');
+        expect(progressResponse.body.data).toHaveProperty('scanId', scanId);
+        expect(progressResponse.body.data).toHaveProperty('status');
+        expect(progressResponse.body.data).toHaveProperty('scannedCount');
+        expect(progressResponse.body.data).toHaveProperty('foundRepos');
+      }
+    });
+  });
 });
