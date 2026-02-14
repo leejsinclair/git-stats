@@ -175,7 +175,7 @@ export class DeveloperAggregationService {
           gitStatsFiles.push(filename);
         }
       }
-    } catch (error) {
+    } catch {
       console.warn('Could not read metadata.json, falling back to reading all files');
       // Fallback: read all analysis files
       const files = await fs.readdir(this.dataDir);

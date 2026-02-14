@@ -447,7 +447,16 @@ gitRouter.post('/analyze/folder/async', async (req: Request, res: Response) => {
  * @returns JSON response with progress details
  */
 gitRouter.get('/analyze/folder/progress/:scanId', async (req: Request, res: Response) => {
-  const { scanId } = req.params;
+  const scanIdParam = req.params.scanId;
+  const scanId = Array.isArray(scanIdParam) ? scanIdParam[0] : scanIdParam;
+
+  if (!scanId) {
+    return res.status(400).json({
+      success: false,
+      error: 'Scan id is required',
+    });
+  }
+
   const progress = folderScanJobs.get(scanId);
 
   if (!progress) {
@@ -555,7 +564,14 @@ gitRouter.get('/metadata', async (req: Request, res: Response) => {
  */
 gitRouter.get('/metadata/status/:status', async (req: Request, res: Response) => {
   try {
-    const { status } = req.params;
+    const statusParam = req.params.status;
+    const status = Array.isArray(statusParam) ? statusParam[0] : statusParam;
+
+    if (!status) {
+      return res.status(400).json({
+        error: 'Status is required. Must be one of: ok, error, analyzing',
+      });
+    }
 
     if (!['ok', 'error', 'analyzing'].includes(status)) {
       return res.status(400).json({

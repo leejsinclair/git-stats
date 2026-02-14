@@ -40,7 +40,18 @@ developerRouter.get('/stats', async (req: Request, res: Response) => {
  */
 developerRouter.get('/stats/:developerName', async (req: Request, res: Response) => {
   try {
-    const { developerName } = req.params;
+    const developerNameParam = req.params.developerName;
+    const developerName = Array.isArray(developerNameParam)
+      ? developerNameParam[0]
+      : developerNameParam;
+
+    if (!developerName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Developer name is required',
+      });
+    }
+
     const stats = await developerService.getDeveloperStats(developerName);
 
     if (!stats) {

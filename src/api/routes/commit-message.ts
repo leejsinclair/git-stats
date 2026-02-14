@@ -80,8 +80,16 @@ commitMessageRouter.post('/analyze', async (req: Request, res: Response) => {
  */
 commitMessageRouter.post('/analyze/repo/:repoName', async (req: Request, res: Response) => {
   try {
-    const { repoName } = req.params;
+    const repoNameParam = req.params.repoName;
+    const repoName = Array.isArray(repoNameParam) ? repoNameParam[0] : repoNameParam;
     const { branch, limit, since, until } = req.body;
+
+    if (!repoName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Repository name is required',
+      });
+    }
 
     const repoPath = path.join(config.reposDir, repoName);
 

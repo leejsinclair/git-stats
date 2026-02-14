@@ -625,7 +625,7 @@ export class GitService {
       const remotes = (await this.git.getRemotes()).map(r => r.name);
 
       return { branches, remotes, isRepo: true };
-    } catch (error) {
+    } catch {
       return { branches: [], remotes: [], isRepo: false };
     }
   }
