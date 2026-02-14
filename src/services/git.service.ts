@@ -111,6 +111,29 @@ export interface CodeChurnSummary {
  * Provides methods to clone, update, and analyze repositories.
  */
 export class GitService {
+  private static readonly IGNORED_CHURN_FILES = new Set([
+    'package-lock.json',
+    'npm-shrinkwrap.json',
+    'yarn.lock',
+    'pnpm-lock.yaml',
+    'composer.lock',
+    'Gemfile.lock',
+    'Pipfile.lock',
+    'poetry.lock',
+    'Cargo.lock',
+    'go.sum',
+    'Podfile.lock',
+  ]);
+
+  private static readonly IGNORED_CHURN_EXTENSIONS = new Set([
+    '.md',
+    '.markdown',
+    '.mdown',
+    '.adoc',
+    '.asciidoc',
+    '.asc',
+  ]);
+
   private git: SimpleGit;
 
   constructor() {
@@ -385,26 +408,13 @@ export class GitService {
 
     const churnMap = new Map<string, { added: number; deleted: number }>();
 
-    const ignoredFiles = new Set([
-      'package-lock.json',
-      'npm-shrinkwrap.json',
-      'yarn.lock',
-      'pnpm-lock.yaml',
-      'composer.lock',
-      'Gemfile.lock',
-      'Pipfile.lock',
-      'poetry.lock',
-      'Cargo.lock',
-      'go.sum',
-      'Podfile.lock',
-    ]);
-
-    const ignoredExtensions = new Set(['.md', '.markdown', '.mdown', '.adoc', '.asciidoc', '.asc']);
-
     const shouldIgnoreFile = (filePath: string): boolean => {
       const baseName = path.basename(filePath);
       const extension = path.extname(baseName).toLowerCase();
-      return ignoredFiles.has(baseName) || ignoredExtensions.has(extension);
+      return (
+        GitService.IGNORED_CHURN_FILES.has(baseName) ||
+        GitService.IGNORED_CHURN_EXTENSIONS.has(extension)
+      );
     };
 
     output
@@ -426,8 +436,8 @@ export class GitService {
 
         const existing = churnMap.get(filePath) || { added: 0, deleted: 0 };
         churnMap.set(filePath, {
-          added: existing.added + (Number.isNaN(added) ? 0 : added),
-          deleted: existing.deleted + (Number.isNaN(deleted) ? 0 : deleted),
+          added: existing.added + added,
+          deleted: existing.deleted + deleted,
         });
       });
 

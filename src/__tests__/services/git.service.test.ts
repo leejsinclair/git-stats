@@ -106,6 +106,13 @@ describe('GitService', () => {
 
       const result = await gitService.getFileChurnSince('/path/to/repo');
 
+      expect(mockGit.raw).toHaveBeenCalledWith([
+        'log',
+        '--numstat',
+        '--pretty=format:',
+        '--since=1 month ago',
+      ]);
+
       expect(result).toEqual([
         {
           filePath: 'src/app.ts',
@@ -122,6 +129,20 @@ describe('GitService', () => {
       ]);
     });
 
+    it('should sort files by totalChanges in descending order', async () => {
+      mockFs.pathExists.mockResolvedValue(true);
+      mockGit.raw.mockResolvedValue(
+        ['10\t0\tsrc/high.ts', '1\t1\tsrc/low.ts', '3\t2\tsrc/mid.ts'].join('\n')
+      );
+
+      const result = await gitService.getFileChurnSince('/path/to/repo');
+
+      const filePaths = result.map(r => r.filePath);
+      const totalChanges = result.map(r => r.totalChanges);
+
+      expect(filePaths).toEqual(['src/high.ts', 'src/mid.ts', 'src/low.ts']);
+      expect(totalChanges).toEqual([10, 5, 2]);
+    });
     it('should throw when repository does not exist', async () => {
       mockFs.pathExists.mockResolvedValue(false);
 
