@@ -82,6 +82,28 @@ export interface RepoAnalysisResult {
     weekly: WeeklyStats[];
   };
   recentCommits: CommitStats[]; // Only last 100 commits in detail
+  codeChurn: CodeChurnSummary;
+}
+
+/**
+ * Represents churn statistics for a single file.
+ */
+export interface FileChurnStats {
+  filePath: string;
+  linesAdded: number;
+  linesDeleted: number;
+  totalChanges: number;
+}
+
+/**
+ * Represents churn summary for a repository over a time window.
+ */
+export interface CodeChurnSummary {
+  since: string;
+  linesAdded: number;
+  linesDeleted: number;
+  totalChanges: number;
+  files: FileChurnStats[];
 }
 
 /**
@@ -212,6 +234,13 @@ export class GitService {
               weekly: [],
             },
             recentCommits: [],
+            codeChurn: {
+              since: '1 month ago',
+              linesAdded: 0,
+              linesDeleted: 0,
+              totalChanges: 0,
+              files: [],
+            },
           };
         }
         throw error;
@@ -275,6 +304,40 @@ export class GitService {
       // Build aggregations
       const aggregations = this.buildAggregations(commits);
 
+      let codeChurn: CodeChurnSummary = {
+        since: '1 month ago',
+        linesAdded: 0,
+        linesDeleted: 0,
+        totalChanges: 0,
+        files: [],
+      };
+
+      try {
+        const churnFiles = await this.getFileChurnSince(repoPath, codeChurn.since);
+        const totals = churnFiles.reduce(
+          (acc, file) => {
+            acc.linesAdded += file.linesAdded;
+            acc.linesDeleted += file.linesDeleted;
+            acc.totalChanges += file.totalChanges;
+            return acc;
+          },
+          { linesAdded: 0, linesDeleted: 0, totalChanges: 0 }
+        );
+
+        codeChurn = {
+          since: codeChurn.since,
+          linesAdded: totals.linesAdded,
+          linesDeleted: totals.linesDeleted,
+          totalChanges: totals.totalChanges,
+          files: churnFiles,
+        };
+      } catch (error) {
+        console.warn(
+          'Failed to calculate file churn:',
+          error instanceof Error ? error.message : 'Unknown error'
+        );
+      }
+
       return {
         repoName: path.basename(repoPath),
         branch,
@@ -292,12 +355,90 @@ export class GitService {
         },
         aggregations,
         recentCommits: commits.slice(0, 100), // Keep only last 100 commits in detail
+        codeChurn,
       };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error in analyzeRepository:', error);
       throw new Error(`Repository analysis failed: ${errorMessage}`);
     }
+  }
+
+  /**
+   * Calculates file churn over a period using git numstat output.
+   *
+   * @param repoPath - Absolute path to the repository
+   * @param since - Git log since filter (defaults to '1 month ago')
+   * @returns Array of file churn stats (most changed first)
+   */
+  async getFileChurnSince(
+    repoPath: string,
+    since: string = '1 month ago'
+  ): Promise<FileChurnStats[]> {
+    if (!(await fs.pathExists(repoPath))) {
+      throw new Error(`Repository not found at ${repoPath}`);
+    }
+
+    this.git = simpleGit(repoPath);
+
+    const output = await this.git.raw(['log', '--numstat', '--pretty=format:', `--since=${since}`]);
+
+    const churnMap = new Map<string, { added: number; deleted: number }>();
+
+    const ignoredFiles = new Set([
+      'package-lock.json',
+      'npm-shrinkwrap.json',
+      'yarn.lock',
+      'pnpm-lock.yaml',
+      'composer.lock',
+      'Gemfile.lock',
+      'Pipfile.lock',
+      'poetry.lock',
+      'Cargo.lock',
+      'go.sum',
+      'Podfile.lock',
+    ]);
+
+    const ignoredExtensions = new Set(['.md', '.markdown', '.mdown', '.adoc', '.asciidoc', '.asc']);
+
+    const shouldIgnoreFile = (filePath: string): boolean => {
+      const baseName = path.basename(filePath);
+      const extension = path.extname(baseName).toLowerCase();
+      return ignoredFiles.has(baseName) || ignoredExtensions.has(extension);
+    };
+
+    output
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .forEach(line => {
+        const match = line.match(/^(\S+)\t(\S+)\t(.+)$/);
+        if (!match) {
+          return;
+        }
+
+        const [, addedRaw, deletedRaw, filePath] = match;
+        if (shouldIgnoreFile(filePath)) {
+          return;
+        }
+        const added = addedRaw === '-' ? 0 : Number.parseInt(addedRaw, 10);
+        const deleted = deletedRaw === '-' ? 0 : Number.parseInt(deletedRaw, 10);
+
+        const existing = churnMap.get(filePath) || { added: 0, deleted: 0 };
+        churnMap.set(filePath, {
+          added: existing.added + (Number.isNaN(added) ? 0 : added),
+          deleted: existing.deleted + (Number.isNaN(deleted) ? 0 : deleted),
+        });
+      });
+
+    return Array.from(churnMap.entries())
+      .map(([filePath, stats]) => ({
+        filePath,
+        linesAdded: stats.added,
+        linesDeleted: stats.deleted,
+        totalChanges: stats.added + stats.deleted,
+      }))
+      .sort((a, b) => b.totalChanges - a.totalChanges);
   }
 
   /**

@@ -23,6 +23,7 @@ describe('GitService', () => {
       checkout: jest.fn().mockResolvedValue(undefined),
       log: jest.fn(),
       show: jest.fn(),
+      raw: jest.fn(),
       cwd: jest.fn().mockReturnThis(),
       init: jest.fn().mockResolvedValue(undefined),
       checkIsRepo: jest.fn().mockResolvedValue(true),
@@ -85,6 +86,47 @@ describe('GitService', () => {
 
       await expect(gitService.scanFolderForRepos('/test/folder', 0)).rejects.toThrow(
         'Folder does not exist'
+      );
+    });
+  });
+
+  describe('getFileChurnSince', () => {
+    it('should parse numstat output and aggregate changes', async () => {
+      mockFs.pathExists.mockResolvedValue(true);
+      mockGit.raw.mockResolvedValue(
+        [
+          '5\t2\tsrc/app.ts',
+          '3\t1\tsrc/app.ts',
+          '-\t-\tassets/logo.png',
+          '12\t4\tpackage-lock.json',
+          '6\t0\tREADME.md',
+          '2\t2\tdocs/guide.adoc',
+        ].join('\n')
+      );
+
+      const result = await gitService.getFileChurnSince('/path/to/repo');
+
+      expect(result).toEqual([
+        {
+          filePath: 'src/app.ts',
+          linesAdded: 8,
+          linesDeleted: 3,
+          totalChanges: 11,
+        },
+        {
+          filePath: 'assets/logo.png',
+          linesAdded: 0,
+          linesDeleted: 0,
+          totalChanges: 0,
+        },
+      ]);
+    });
+
+    it('should throw when repository does not exist', async () => {
+      mockFs.pathExists.mockResolvedValue(false);
+
+      await expect(gitService.getFileChurnSince('/missing/repo')).rejects.toThrow(
+        'Repository not found'
       );
     });
   });

@@ -62,6 +62,22 @@ export interface RepoAnalysisResult {
     weekly: WeeklyStats[];
   };
   recentCommits: CommitStats[];
+  codeChurn: CodeChurnSummary;
+}
+
+export interface FileChurnStats {
+  filePath: string;
+  linesAdded: number;
+  linesDeleted: number;
+  totalChanges: number;
+}
+
+export interface CodeChurnSummary {
+  since: string;
+  linesAdded: number;
+  linesDeleted: number;
+  totalChanges: number;
+  files: FileChurnStats[];
 }
 
 export interface RepoMetadata {
