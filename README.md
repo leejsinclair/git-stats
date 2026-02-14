@@ -13,6 +13,61 @@ This application provides deep insights into Git repositories by analyzing:
 - **Commit Message Quality**: Automated analysis against best practices and Conventional Commits
 - **Activity Trends**: Weekly, monthly, and yearly aggregations for long-term insights
 
+## ✨ Features
+
+### 📊 Repository Dashboard
+
+![Repository overview dashboard](./assets/git-repo-dashboard.png)
+
+- View all analyzed repositories with status indicators
+- Filter by status (OK, Error, Analyzing)
+- Real-time analysis status updates
+- Click cards to view detailed repository analysis
+- Bulk folder scanning for multiple repositories
+
+### 📈 Repository Analysis
+
+![Repository detail view](./assets/git-repo-detail.png)
+
+- **Summary Statistics**: Total commits, contributors, lines added/removed, file changes
+- **Commit Trends**: Weekly commit activity visualization over time
+- **Monthly Activity**: Commits and active authors aggregated by month
+- **Author Contributions**: Ranked contributors by commit count
+- **Recent Commits**: Last 100 commits with full details and diffs
+- **Hierarchical Aggregation**: Weekly → Monthly → Yearly statistics
+
+### 👥 Developer Analytics
+
+![Repository overview dashboard](./assets/developer-overview.png)
+
+![Developer detail view](./assets/developer-detail.png)
+
+- **Aggregated Metrics**: Combined statistics across all repositories
+- **Activity Patterns**: 
+  - Commits by day of week and hour of day
+  - Active days and average commits per day
+  - Recent activity trends (last 30 days)
+- **Code Metrics**:
+  - Lines added, removed, and modified
+  - Files changed across all projects
+  - Per-repository contribution breakdown
+- **Commit Message Quality**:
+  - Average message score (0-100)
+  - Pass rate percentage
+  - Common issues and violations
+  - Integration with commit message analyzer
+
+### ✅ Commit Message Quality Analysis
+- **Best Practice Validation**: Checks against industry-standard guidelines
+- **Conventional Commits Support**: Full validation of type(scope): description format
+- **Detailed Scoring**: Each commit scored 0-100 based on compliance
+- **Issue Detection**:
+  - Subject line length (≤50 ideal, ≤72 hard limit)
+  - Proper capitalization and formatting
+  - Body line length and separation
+  - Generic message detection
+- *🛠️ Development
+
 ## 🏗️ Architecture
 
 - **Backend**: Node.js + Express + TypeScript + simple-git
@@ -121,61 +176,6 @@ docker-compose up -d --build
 ### Cleanup
 - `GET /api/cleanup/old-files` - Preview old analysis files
 - `POST /api/cleanup/old-files` - Delete old analysis files
-
-## ✨ Features
-
-### 📊 Repository Dashboard
-
-![Repository overview dashboard](./assets/git-repo-dashboard.png)
-
-- View all analyzed repositories with status indicators
-- Filter by status (OK, Error, Analyzing)
-- Real-time analysis status updates
-- Click cards to view detailed repository analysis
-- Bulk folder scanning for multiple repositories
-
-### 📈 Repository Analysis
-
-![Repository detail view](./assets/git-repo-detail.png)
-
-- **Summary Statistics**: Total commits, contributors, lines added/removed, file changes
-- **Commit Trends**: Weekly commit activity visualization over time
-- **Monthly Activity**: Commits and active authors aggregated by month
-- **Author Contributions**: Ranked contributors by commit count
-- **Recent Commits**: Last 100 commits with full details and diffs
-- **Hierarchical Aggregation**: Weekly → Monthly → Yearly statistics
-
-### 👥 Developer Analytics
-
-![Repository overview dashboard](./assets/developer-overview.png)
-
-![Developer detail view](./assets/developer-detail.png)
-
-- **Aggregated Metrics**: Combined statistics across all repositories
-- **Activity Patterns**: 
-  - Commits by day of week and hour of day
-  - Active days and average commits per day
-  - Recent activity trends (last 30 days)
-- **Code Metrics**:
-  - Lines added, removed, and modified
-  - Files changed across all projects
-  - Per-repository contribution breakdown
-- **Commit Message Quality**:
-  - Average message score (0-100)
-  - Pass rate percentage
-  - Common issues and violations
-  - Integration with commit message analyzer
-
-### ✅ Commit Message Quality Analysis
-- **Best Practice Validation**: Checks against industry-standard guidelines
-- **Conventional Commits Support**: Full validation of type(scope): description format
-- **Detailed Scoring**: Each commit scored 0-100 based on compliance
-- **Issue Detection**:
-  - Subject line length (≤50 ideal, ≤72 hard limit)
-  - Proper capitalization and formatting
-  - Body line length and separation
-  - Generic message detection
-- *🛠️ Development
 
 ### Backend Commands
 ```bash
