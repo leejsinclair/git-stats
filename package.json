@@ -13,7 +13,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:commit-analyzer": "ts-node src/utils/test-commit-analyzer.ts",
-    "coverage:badge": "make-coverage-badge --output-path ./coverage-backend.svg",
+    "coverage:badge": "node scripts/make-coverage-badge.js --label Backend --output-path ./coverage-backend.svg",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",

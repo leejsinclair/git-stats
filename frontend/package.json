@@ -14,7 +14,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "coverage:badge": "make-coverage-badge --output-path ./coverage-frontend.svg",
+    "coverage:badge": "node ../scripts/make-coverage-badge.js --label Frontend --output-path ./coverage-frontend.svg",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
