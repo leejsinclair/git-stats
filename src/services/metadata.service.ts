@@ -9,6 +9,33 @@ import { config } from '../config';
 export type AnalysisStatus = 'ok' | 'error' | 'analyzing';
 
 /**
+ * Summary stats captured for a repository analysis.
+ */
+export interface RepoSummary {
+  totalCommits: number;
+  totalAuthors: number;
+  totalLinesAdded: number;
+  totalLinesRemoved: number;
+  totalFilesChanged: number;
+  firstCommit: string | null;
+  lastCommit: string | null;
+}
+
+interface RepoAnalysisSummarySource {
+  totalCommits: number;
+  authors: string[];
+  dateRange: {
+    firstCommit: string | null;
+    lastCommit: string | null;
+  };
+  summary: {
+    totalLinesAdded: number;
+    totalLinesRemoved: number;
+    totalFilesChanged: number;
+  };
+}
+
+/**
  * Metadata for a single analyzed repository.
  */
 export interface RepoMetadata {
@@ -19,6 +46,7 @@ export interface RepoMetadata {
   outputFile?: string;
   error?: string;
   branch?: string;
+  summary?: RepoSummary;
 }
 
 /**
@@ -49,7 +77,7 @@ export class MetadataService {
     try {
       if (await fs.pathExists(this.metadataPath)) {
         const data = await fs.readJson(this.metadataPath);
-        return data;
+        return await this.hydrateSummaries(data);
       }
       return {
         repositories: [],
@@ -62,6 +90,54 @@ export class MetadataService {
         lastUpdated: new Date().toISOString(),
       };
     }
+  }
+
+  private async hydrateSummaries(metadata: Metadata): Promise<Metadata> {
+    let updated = false;
+
+    for (const repo of metadata.repositories) {
+      if (repo.summary || !repo.outputFile || repo.status !== 'ok') {
+        continue;
+      }
+
+      const outputPath = path.isAbsolute(repo.outputFile)
+        ? repo.outputFile
+        : path.join(process.cwd(), repo.outputFile);
+
+      if (!(await fs.pathExists(outputPath))) {
+        continue;
+      }
+
+      try {
+        const analysis = (await fs.readJson(outputPath)) as RepoAnalysisSummarySource;
+
+        if (!analysis || !analysis.summary) {
+          continue;
+        }
+
+        repo.summary = {
+          totalCommits: analysis.totalCommits ?? 0,
+          totalAuthors: analysis.authors?.length ?? 0,
+          totalLinesAdded: analysis.summary.totalLinesAdded ?? 0,
+          totalLinesRemoved: analysis.summary.totalLinesRemoved ?? 0,
+          totalFilesChanged: analysis.summary.totalFilesChanged ?? 0,
+          firstCommit: analysis.dateRange?.firstCommit ?? null,
+          lastCommit: analysis.dateRange?.lastCommit ?? null,
+        };
+        updated = true;
+      } catch (error) {
+        console.warn(
+          `Unable to hydrate summary for ${repo.repoName}:`,
+          error instanceof Error ? error.message : 'Unknown error'
+        );
+      }
+    }
+
+    if (updated) {
+      await this.writeMetadata(metadata);
+    }
+
+    return metadata;
   }
 
   /**
@@ -97,6 +173,7 @@ export class MetadataService {
       outputFile?: string;
       error?: string;
       branch?: string;
+      summary?: RepoSummary;
     } = {}
   ): Promise<void> {
     const metadata = await this.readMetadata();
@@ -112,6 +189,7 @@ export class MetadataService {
       ...(options.outputFile && { outputFile: options.outputFile }),
       ...(options.error && { error: options.error }),
       ...(options.branch && { branch: options.branch }),
+      ...(options.summary && { summary: options.summary }),
     };
 
     if (existingIndex >= 0) {

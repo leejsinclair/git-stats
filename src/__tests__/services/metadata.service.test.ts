@@ -29,12 +29,41 @@ describe('MetadataService', () => {
         lastUpdated: '2024-01-01T00:00:00.000Z',
       };
 
+      const mockAnalysis = {
+        totalCommits: 12,
+        authors: ['A', 'B'],
+        dateRange: {
+          firstCommit: '2023-01-01T00:00:00.000Z',
+          lastCommit: '2024-01-01T00:00:00.000Z',
+        },
+        summary: {
+          totalLinesAdded: 10,
+          totalLinesRemoved: 5,
+          totalFilesChanged: 3,
+        },
+      };
+
       mockFs.pathExists.mockResolvedValue(true);
-      mockFs.readJson.mockResolvedValue(mockMetadata);
+      mockFs.readJson.mockImplementation((filePath: string) => {
+        if (filePath.endsWith('metadata.json')) {
+          return Promise.resolve(mockMetadata);
+        }
+        return Promise.resolve(mockAnalysis);
+      });
+      mockFs.ensureDir.mockResolvedValue(undefined);
+      mockFs.writeJson.mockResolvedValue(undefined);
 
       const result = await metadataService.readMetadata();
 
-      expect(result).toEqual(mockMetadata);
+      expect(result.repositories[0].summary).toEqual({
+        totalCommits: 12,
+        totalAuthors: 2,
+        totalLinesAdded: 10,
+        totalLinesRemoved: 5,
+        totalFilesChanged: 3,
+        firstCommit: '2023-01-01T00:00:00.000Z',
+        lastCommit: '2024-01-01T00:00:00.000Z',
+      });
       expect(result.repositories).toHaveLength(1);
     });
 
