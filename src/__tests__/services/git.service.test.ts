@@ -22,6 +22,7 @@ describe('GitService', () => {
       pull: jest.fn().mockResolvedValue(undefined),
       checkout: jest.fn().mockResolvedValue(undefined),
       log: jest.fn(),
+      diffSummary: jest.fn(),
       show: jest.fn(),
       raw: jest.fn(),
       cwd: jest.fn().mockReturnThis(),
@@ -149,6 +150,57 @@ describe('GitService', () => {
       await expect(gitService.getFileChurnSince('/missing/repo')).rejects.toThrow(
         'Repository not found'
       );
+    });
+  });
+
+  describe('analyzeRepository', () => {
+    it('should return empty analysis when repository has no commits', async () => {
+      mockFs.pathExists.mockResolvedValue(true);
+      mockGit.log.mockRejectedValue(new Error('does not have any commits yet'));
+
+      const result = await gitService.analyzeRepository('/path/to/repo');
+
+      expect(result.totalCommits).toBe(0);
+      expect(result.recentCommits).toEqual([]);
+      expect(result.codeChurn.totalChanges).toBe(0);
+    });
+
+    it('should throw when repository path does not exist', async () => {
+      mockFs.pathExists.mockResolvedValue(false);
+
+      await expect(gitService.analyzeRepository('/missing/repo')).rejects.toThrow(
+        'Repository not found'
+      );
+    });
+
+    it('should tolerate diff summary failures and still return results', async () => {
+      mockFs.pathExists.mockResolvedValue(true);
+      mockGit.log.mockResolvedValue({
+        all: [
+          {
+            hash: 'a1',
+            author: 'Dev',
+            email: 'dev@example.com',
+            date: new Date('2024-01-02').toISOString(),
+            message: 'first',
+          },
+          {
+            hash: 'b2',
+            author: 'Dev',
+            email: 'dev@example.com',
+            date: new Date('2024-01-01').toISOString(),
+            message: 'second',
+          },
+        ],
+      });
+      mockGit.diffSummary.mockRejectedValue(new Error('diff failed'));
+      jest.spyOn(gitService, 'getFileChurnSince').mockResolvedValue([]);
+
+      const result = await gitService.analyzeRepository('/path/to/repo');
+
+      expect(result.totalCommits).toBe(2);
+      expect(result.summary.totalLinesAdded).toBe(0);
+      expect(result.summary.totalLinesRemoved).toBe(0);
     });
   });
 });
