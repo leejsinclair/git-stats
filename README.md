@@ -124,13 +124,10 @@ docker-compose up -d --build
 
 ## ✨ Features
 
-### Screenshots
-
-![Repository overview dashboard](./assets/developer-overview.png)
-![Developer detail view](./assets/developer-detail.png)
-![Repository detail view](./assets/git-repo-detail.png)
-
 ### 📊 Repository Dashboard
+
+![Repository overview dashboard](./assets/git-repo-dashboard.png)
+
 - View all analyzed repositories with status indicators
 - Filter by status (OK, Error, Analyzing)
 - Real-time analysis status updates
@@ -138,6 +135,9 @@ docker-compose up -d --build
 - Bulk folder scanning for multiple repositories
 
 ### 📈 Repository Analysis
+
+![Repository detail view](./assets/git-repo-detail.png)
+
 - **Summary Statistics**: Total commits, contributors, lines added/removed, file changes
 - **Commit Trends**: Weekly commit activity visualization over time
 - **Monthly Activity**: Commits and active authors aggregated by month
@@ -146,6 +146,11 @@ docker-compose up -d --build
 - **Hierarchical Aggregation**: Weekly → Monthly → Yearly statistics
 
 ### 👥 Developer Analytics
+
+![Repository overview dashboard](./assets/developer-overview.png)
+
+![Developer detail view](./assets/developer-detail.png)
+
 - **Aggregated Metrics**: Combined statistics across all repositories
 - **Activity Patterns**: 
   - Commits by day of week and hour of day
