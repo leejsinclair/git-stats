@@ -14,6 +14,9 @@ const mockFs = fs as any;
 jest.mock('../../services/git.service');
 jest.mock('../../services/metadata.service');
 
+const MockGitService = GitService as jest.MockedClass<typeof GitService>;
+const MockMetadataService = MetadataService as jest.MockedClass<typeof MetadataService>;
+
 const app = express();
 app.use(express.json());
 app.use('/api/git', gitRouter);
@@ -70,14 +73,20 @@ describe('Git API Routes', () => {
         developers: 5,
       };
 
-      (GitService as jest.Mock).mockImplementation(() => ({
-        cloneOrUpdateRepo: jest.fn().mockResolvedValue(undefined),
-        analyzeRepository: jest.fn().mockResolvedValue(mockAnalysisResult),
-      }));
+      MockGitService.mockImplementation(
+        () =>
+          ({
+            cloneOrUpdateRepo: jest.fn().mockResolvedValue(undefined),
+            analyzeRepository: jest.fn().mockResolvedValue(mockAnalysisResult),
+          }) as unknown as GitService
+      );
 
-      (MetadataService as jest.Mock).mockImplementation(() => ({
-        updateRepoStatus: jest.fn().mockResolvedValue(undefined),
-      }));
+      MockMetadataService.mockImplementation(
+        () =>
+          ({
+            updateRepoStatus: jest.fn().mockResolvedValue(undefined),
+          }) as unknown as MetadataService
+      );
 
       const response = await request(app)
         .post('/api/git/analyze/remote')
@@ -113,12 +122,20 @@ describe('Git API Routes', () => {
         developers: 3,
       };
 
-      (GitService as jest.Mock).mockImplementation(() => ({
-        setupLocalRepo: jest.fn().mockResolvedValue(undefined),
-        analyzeRepository: jest.fn().mockResolvedValue(mockAnalysisResult),
-      }));
+      MockGitService.mockImplementation(
+        () =>
+          ({
+            setupLocalRepo: jest.fn().mockResolvedValue(undefined),
+            analyzeRepository: jest.fn().mockResolvedValue(mockAnalysisResult),
+          }) as unknown as GitService
+      );
 
-      MetadataService as jest.Mock;
+      MockMetadataService.mockImplementation(
+        () =>
+          ({
+            updateRepoStatus: jest.fn().mockResolvedValue(undefined),
+          }) as unknown as MetadataService
+      );
       const response = await request(app)
         .post('/api/git/analyze/local')
         .send({

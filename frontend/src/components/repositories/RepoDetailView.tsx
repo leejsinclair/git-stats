@@ -19,6 +19,27 @@ interface RepoDetailViewProps {
 export function RepoDetailView({ analysis, onBack }: RepoDetailViewProps) {
   const formatNumber = (num: number) => num.toLocaleString();
   const formatDate = (date: string | null) => (date ? new Date(date).toLocaleDateString() : 'N/A');
+  const churnFiles = analysis.codeChurn?.files ?? [];
+  const churnMax = churnFiles.reduce((max, file) => Math.max(max, file.totalChanges), 0);
+  const churnLevel = (changes: number) => {
+    const ratio = churnMax > 0 ? changes / churnMax : 0;
+    if (ratio >= 0.7) {
+      return {
+        label: 'problematic',
+        className: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+      };
+    }
+    if (ratio >= 0.4) {
+      return {
+        label: 'watch',
+        className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+      };
+    }
+    return {
+      label: 'ok',
+      className: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+    };
+  };
 
   return (
     <div className="space-y-6">
@@ -89,6 +110,78 @@ export function RepoDetailView({ analysis, onBack }: RepoDetailViewProps) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Code Churn */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Code Churn</h3>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Last {analysis.codeChurn?.since ?? '1 month'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-gray-50 dark:bg-gray-700/40 rounded-lg p-4">
+            <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Total Changes
+            </div>
+            <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {formatNumber(analysis.codeChurn?.totalChanges ?? 0)}
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700/40 rounded-lg p-4">
+            <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Lines Added
+            </div>
+            <div className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
+              +{formatNumber(analysis.codeChurn?.linesAdded ?? 0)}
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700/40 rounded-lg p-4">
+            <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Lines Deleted
+            </div>
+            <div className="text-2xl font-semibold text-red-600 dark:text-red-400">
+              -{formatNumber(analysis.codeChurn?.linesDeleted ?? 0)}
+            </div>
+          </div>
+        </div>
+
+        {churnFiles.length === 0 ? (
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            No churn data available for the selected window.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {churnFiles.slice(0, 10).map(file => {
+              const level = churnLevel(file.totalChanges);
+              return (
+                <div
+                  key={file.filePath}
+                  className="flex flex-col md:flex-row md:items-center gap-3 border border-gray-100 dark:border-gray-700 rounded-lg p-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {file.filePath}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      +{formatNumber(file.linesAdded)} / -{formatNumber(file.linesDeleted)}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${level.className}`}>
+                      {level.label}
+                    </span>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {formatNumber(file.totalChanges)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Charts */}
