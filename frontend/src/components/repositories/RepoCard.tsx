@@ -26,6 +26,11 @@ export function RepoCard({ repo, onClick }: RepoCardProps) {
     analyzing: '⟳',
   };
 
+  const formatNumber = (value: number) => value.toLocaleString();
+  const summaryMessage = repo.status === 'ok'
+    ? 'Summary unavailable for this run.'
+    : 'Summary available after analysis.';
+
   return (
     <div
       onClick={onClick}
@@ -48,6 +53,45 @@ export function RepoCard({ repo, onClick }: RepoCardProps) {
         </div>
         <div>Last analyzed: {new Date(repo.lastAnalyzed).toLocaleString()}</div>
       </div>
+
+      {repo.summary ? (
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="bg-gray-50 dark:bg-gray-700/40 rounded p-2">
+            <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Commits
+            </div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+              {formatNumber(repo.summary.totalCommits)}
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700/40 rounded p-2">
+            <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Contributors
+            </div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+              {formatNumber(repo.summary.totalAuthors)}
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700/40 rounded p-2">
+            <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Lines Added
+            </div>
+            <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+              +{formatNumber(repo.summary.totalLinesAdded)}
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700/40 rounded p-2">
+            <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              Lines Removed
+            </div>
+            <div className="text-sm font-semibold text-red-600 dark:text-red-400">
+              -{formatNumber(repo.summary.totalLinesRemoved)}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 text-xs text-gray-500 dark:text-gray-500">{summaryMessage}</div>
+      )}
 
       {repo.error && (
         <div className="mt-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded">

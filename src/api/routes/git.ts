@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import { config } from '../../config';
-import { GitService } from '../../services/git.service';
+import { GitService, RepoAnalysisResult } from '../../services/git.service';
 import { MetadataService } from '../../services/metadata.service';
 
 export const gitRouter = Router();
@@ -25,6 +25,16 @@ interface FolderScanProgress {
 }
 
 const folderScanJobs = new Map<string, FolderScanProgress>();
+
+const buildRepoSummary = (result: RepoAnalysisResult) => ({
+  totalCommits: result.totalCommits,
+  totalAuthors: result.authors.length,
+  totalLinesAdded: result.summary.totalLinesAdded,
+  totalLinesRemoved: result.summary.totalLinesRemoved,
+  totalFilesChanged: result.summary.totalFilesChanged,
+  firstCommit: result.dateRange.firstCommit,
+  lastCommit: result.dateRange.lastCommit,
+});
 
 // Ensure data directories exist
 fs.ensureDirSync(config.reposDir);
@@ -76,6 +86,7 @@ gitRouter.post('/analyze/remote', async (req: Request, res: Response) => {
         repoName,
         branch,
         outputFile: outputPath,
+        summary: buildRepoSummary(result),
       });
 
       res.json({
@@ -147,6 +158,7 @@ gitRouter.post('/analyze/local', async (req: Request, res: Response) => {
         repoName,
         branch,
         outputFile: outputPath,
+        summary: buildRepoSummary(result),
       });
 
       res.json({
@@ -232,6 +244,7 @@ gitRouter.post('/analyze/folder', async (req: Request, res: Response) => {
             repoName,
             branch,
             outputFile: outputPath,
+            summary: buildRepoSummary(result),
           });
 
           results.push({
@@ -244,6 +257,7 @@ gitRouter.post('/analyze/folder', async (req: Request, res: Response) => {
           await metadataService.updateRepoStatus(repoPath, 'ok', {
             repoName,
             branch,
+            summary: buildRepoSummary(result),
           });
 
           results.push({
@@ -370,6 +384,7 @@ gitRouter.post('/analyze/folder/async', async (req: Request, res: Response) => {
                 repoName,
                 branch,
                 outputFile: outputPath,
+                summary: buildRepoSummary(result),
               });
 
               results.push({
@@ -381,6 +396,7 @@ gitRouter.post('/analyze/folder/async', async (req: Request, res: Response) => {
               await metadataService.updateRepoStatus(repoPath, 'ok', {
                 repoName,
                 branch,
+                summary: buildRepoSummary(result),
               });
 
               results.push({

@@ -160,6 +160,26 @@ export interface CodeChurnSummary {
 }
 
 /**
+ * Summary stats captured for a repository analysis.
+ */
+export interface RepoSummary {
+  /** Total commit count. */
+  totalCommits: number;
+  /** Unique authors count. */
+  totalAuthors: number;
+  /** Total lines added across history. */
+  totalLinesAdded: number;
+  /** Total lines removed across history. */
+  totalLinesRemoved: number;
+  /** Total files changed across history. */
+  totalFilesChanged: number;
+  /** ISO date of the first commit. */
+  firstCommit: string | null;
+  /** ISO date of the latest commit. */
+  lastCommit: string | null;
+}
+
+/**
  * Metadata for a repository tracked by the analysis pipeline.
  */
 export interface RepoMetadata {
@@ -177,6 +197,8 @@ export interface RepoMetadata {
   error?: string;
   /** Branch used for analysis. */
   branch?: string;
+  /** Summary metrics for the most recent analysis. */
+  summary?: RepoSummary;
 }
 
 /**
