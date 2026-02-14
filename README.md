@@ -124,6 +124,12 @@ docker-compose up -d --build
 
 ## ✨ Features
 
+### Screenshots
+
+![Repository overview dashboard](./assets/developer-overview.png)
+![Developer detail view](./assets/developer-detail.png)
+![Repository detail view](./assets/git-repo-detail.png)
+
 ### 📊 Repository Dashboard
 - View all analyzed repositories with status indicators
 - Filter by status (OK, Error, Analyzing)
