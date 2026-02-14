@@ -638,8 +638,13 @@ export class GitService {
    * @returns Array of paths to found Git repositories
    * @throws {Error} If folder does not exist
    */
-  async scanFolderForRepos(folderPath: string, maxDepth: number = 3): Promise<string[]> {
+  async scanFolderForRepos(
+    folderPath: string,
+    maxDepth: number = 3,
+    onProgress?: (currentPath: string, scannedCount: number) => void
+  ): Promise<string[]> {
     const foundRepos: string[] = [];
+    let scannedCount = 0;
 
     const scanDirectory = async (currentPath: string, currentDepth: number): Promise<void> => {
       if (currentDepth > maxDepth) {
@@ -647,6 +652,9 @@ export class GitService {
       }
 
       try {
+        scannedCount += 1;
+        onProgress?.(currentPath, scannedCount);
+
         // Check if current directory is a git repo
         const isRepo = await simpleGit(currentPath).checkIsRepo();
         if (isRepo) {

@@ -84,9 +84,11 @@ function App() {
   }
 
   async function handleScanFolder(folder: string) {
-    const result = await api.analyzeFolder(folder, 3, 'main', true);
+    return await api.startFolderScan(folder, 3, 'main', true);
+  }
+
+  async function handleScanComplete() {
     await loadMetadata();
-    return result;
   }
 
   async function handleCleanupClick() {
@@ -172,6 +174,7 @@ function App() {
         isOpen={showScanModal}
         onClose={() => setShowScanModal(false)}
         onScan={handleScanFolder}
+        onScanComplete={handleScanComplete}
       />
 
       <CleanupModal

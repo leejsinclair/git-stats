@@ -4,6 +4,18 @@ const API_BASE_URL = 'http://localhost:3000/api/git';
 const DEVELOPER_API_URL = 'http://localhost:3000/api/developers';
 const CLEANUP_API_URL = 'http://localhost:3000/api/cleanup';
 
+export interface FolderScanProgress {
+  scanId: string;
+  status: 'scanning' | 'analyzing' | 'complete' | 'error';
+  currentFolder: string | null;
+  scannedCount: number;
+  foundRepos: number;
+  successfulAnalysis: number;
+  failedAnalysis: number;
+  message?: string;
+  error?: string;
+}
+
 export const api = {
   // Get all metadata
   async getMetadata(): Promise<Metadata> {
@@ -47,6 +59,31 @@ export const api = {
     });
     if (!response.ok) throw new Error('Failed to scan folder');
     return await response.json();
+  },
+
+  // Start a folder scan job and return a scan id
+  async startFolderScan(
+    folderPath: string,
+    maxDepth: number = 3,
+    branch: string = 'main',
+    saveResults: boolean = true
+  ): Promise<{ scanId: string }> {
+    const response = await fetch(`${API_BASE_URL}/analyze/folder/async`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folderPath, maxDepth, branch, saveResults }),
+    });
+    if (!response.ok) throw new Error('Failed to start folder scan');
+    const data = await response.json();
+    return data;
+  },
+
+  // Get progress for a folder scan job
+  async getFolderScanProgress(scanId: string): Promise<FolderScanProgress> {
+    const response = await fetch(`${API_BASE_URL}/analyze/folder/progress/${scanId}`);
+    if (!response.ok) throw new Error('Failed to fetch scan progress');
+    const data = await response.json();
+    return data.data;
   },
 
   // Load analysis from output file

@@ -89,6 +89,22 @@ describe('GitService', () => {
         'Folder does not exist'
       );
     });
+
+    it('should call progress callback with current path and count', async () => {
+      mockFs.pathExists.mockResolvedValue(true);
+      mockFs.readdir.mockResolvedValueOnce([
+        { name: 'folder1', isDirectory: () => true },
+        { name: 'folder2', isDirectory: () => true },
+      ]);
+      mockFs.readdir.mockResolvedValue([]);
+      mockGit.checkIsRepo.mockResolvedValue(false);
+
+      const progressCallback = jest.fn();
+      await gitService.scanFolderForRepos('/test/folder', 2, progressCallback);
+
+      expect(progressCallback).toHaveBeenCalled();
+      expect(progressCallback.mock.calls[0][1]).toBe(1); // First call with count 1
+    });
   });
 
   describe('getFileChurnSince', () => {
