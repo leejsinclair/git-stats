@@ -47,6 +47,7 @@ const parseArgs = args => {
 }
 
 const printUsage = () => {
+  // eslint-disable-next-line no-undef
   console.log(
     'usage: make-coverage-badge.js [-h,--help] [--label] [--report-path] [--output-path]'
   )
@@ -93,6 +94,7 @@ const main = () => {
   download(url, (err, svg) => {
     if (err) throw err
     writeFileSync(options['output-path'], svg, 'utf8')
+    // eslint-disable-next-line no-undef
     console.log(`Wrote coverage badge to: ${options['output-path']}`)
   })
 }
@@ -100,6 +102,7 @@ const main = () => {
 try {
   main()
 } catch (error) {
+  // eslint-disable-next-line no-undef
   console.error(error.message)
   process.exitCode = 1
 }

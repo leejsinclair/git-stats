@@ -47,6 +47,7 @@ module.exports = [
       ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+      'preserve-caught-error': 'off',
     },
   },
   {
