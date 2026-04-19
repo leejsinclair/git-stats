@@ -20,6 +20,7 @@ module.exports = [
         sourceType: 'commonjs',
       },
       globals: {
+        console: 'readonly',
         module: 'readonly',
         require: 'readonly',
         __dirname: 'readonly',
