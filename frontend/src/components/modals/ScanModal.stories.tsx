@@ -19,8 +19,9 @@ export const Open: Story = {
     onClose: () => console.log('Modal closed'),
     onScan: async (folder: string) => {
       console.log('Scanning folder:', folder);
-      return { foundRepos: 5, successfulAnalysis: 5 };
+      return { scanId: 'mock-scan-id-001' };
     },
+    onScanComplete: () => console.log('Scan complete'),
     initialFolder: '/home/user/projects',
   },
 };
@@ -31,7 +32,8 @@ export const Closed: Story = {
     onClose: () => console.log('Modal closed'),
     onScan: async (folder: string) => {
       console.log('Scanning folder:', folder);
-      return { foundRepos: 5, successfulAnalysis: 5 };
+      return { scanId: 'mock-scan-id-002' };
     },
+    onScanComplete: () => console.log('Scan complete'),
   },
 };

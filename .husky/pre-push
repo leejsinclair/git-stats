@@ -7,11 +7,12 @@ export NVM_DIR="$HOME/.nvm"
 # Run backend tests with coverage
 echo "Running backend tests with coverage..."
 npm run test:coverage || exit 1
-npm run coverage:badge
+npm run coverage:badge || true
 
 # Run frontend tests with coverage
 echo "Running frontend tests with coverage..."
-cd frontend && npm run test:coverage -- --run && npm run coverage:badge || exit 1
+cd frontend && npm run test:coverage -- --run || exit 1
+npm run coverage:badge || true
 cd ..
 
 # Add coverage badges to the commit
