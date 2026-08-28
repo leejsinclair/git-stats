@@ -11,9 +11,8 @@ npm run coverage:badge || true
 
 # Run frontend tests with coverage
 echo "Running frontend tests with coverage..."
-cd frontend && npm run test:coverage -- --run || exit 1
-npm run coverage:badge || true
-cd ..
+(cd frontend && npm run test:coverage -- --run || exit 1
+npm run coverage:badge || true)
 
 # Add coverage badges to the commit
 git add coverage-backend.svg frontend/coverage-frontend.svg 2>/dev/null || true

@@ -5,7 +5,6 @@ import request from 'supertest';
 
 import cleanupRouter from '../../api/routes/cleanup';
 
-// Mock fs/promises before any imports that use it
 jest.mock('fs/promises');
 
 const mockFs = fs as jest.Mocked<typeof fs>;

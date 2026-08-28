@@ -5,7 +5,6 @@ import request from 'supertest';
 import { developerRouter } from '../../api/routes/developer';
 import { DeveloperAggregationService } from '../../services/developer-aggregation.service';
 
-// Mock the DeveloperAggregationService before importing the router
 jest.mock('../../services/developer-aggregation.service');
 
 const MockDeveloperAggregationService = DeveloperAggregationService as jest.MockedClass<
