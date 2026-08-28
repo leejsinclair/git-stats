@@ -1,13 +1,69 @@
+import { jest } from '@jest/globals';
+import * as fs from 'fs/promises';
+
 import { DeveloperAggregationService } from '../../services/developer-aggregation.service';
+
+// Mock fs/promises before importing the service
+jest.mock('fs/promises');
+
+const mockFs = fs as jest.Mocked<typeof fs>;
+
+/** Minimal analysis file content representing one commit by one developer. */
+const MOCK_ANALYSIS = {
+  recentCommits: [
+    {
+      hash: 'abc123',
+      author: 'Alice Dev',
+      email: 'alice@example.com',
+      date: '2024-01-15T10:00:00Z',
+      message: 'feat: add new feature',
+      linesAdded: 50,
+      linesRemoved: 10,
+      filesChanged: ['src/feature.ts', 'src/__tests__/feature.test.ts'],
+    },
+    {
+      hash: 'def456',
+      author: 'Alice Dev',
+      email: 'alice@example.com',
+      date: '2024-01-16T14:00:00Z',
+      message: 'fix: correct bug',
+      linesAdded: 5,
+      linesRemoved: 3,
+      filesChanged: ['src/bug.ts'],
+    },
+  ],
+};
+
+const MOCK_METADATA = {
+  repositories: [
+    {
+      repoName: 'my-repo',
+      outputFile: '/data/output/my-repo-analysis-2024.json',
+      status: 'ok',
+    },
+  ],
+};
 
 describe('DeveloperAggregationService', () => {
   let service: DeveloperAggregationService;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     service = new DeveloperAggregationService();
   });
 
   describe('aggregateDevelopers', () => {
+    beforeEach(() => {
+      // metadata.json resolves successfully
+      mockFs.readFile.mockImplementation((filePath: any) => {
+        const p = String(filePath);
+        if (p.endsWith('metadata.json')) {
+          return Promise.resolve(JSON.stringify(MOCK_METADATA)) as any;
+        }
+        return Promise.resolve(JSON.stringify(MOCK_ANALYSIS)) as any;
+      });
+    });
+
     it('should return a developer report', async () => {
       const report = await service.aggregateDevelopers();
 
@@ -91,9 +147,34 @@ describe('DeveloperAggregationService', () => {
         );
       }
     });
+
+    it('should fall back to readdir when metadata.json is missing', async () => {
+      mockFs.readFile.mockImplementation((filePath: any) => {
+        const p = String(filePath);
+        if (p.endsWith('metadata.json')) {
+          return Promise.reject(new Error('ENOENT')) as any;
+        }
+        return Promise.resolve(JSON.stringify(MOCK_ANALYSIS)) as any;
+      });
+      mockFs.readdir.mockResolvedValue(['my-repo-analysis-2024.json'] as any);
+
+      const report = await service.aggregateDevelopers();
+      expect(report).toHaveProperty('developers');
+      expect(Array.isArray(report.developers)).toBe(true);
+    });
   });
 
   describe('getDeveloperStats', () => {
+    beforeEach(() => {
+      mockFs.readFile.mockImplementation((filePath: any) => {
+        const p = String(filePath);
+        if (p.endsWith('metadata.json')) {
+          return Promise.resolve(JSON.stringify(MOCK_METADATA)) as any;
+        }
+        return Promise.resolve(JSON.stringify(MOCK_ANALYSIS)) as any;
+      });
+    });
+
     it('should return null for non-existent developer', async () => {
       const stats = await service.getDeveloperStats('NonExistentDeveloper');
       expect(stats).toBeNull();
