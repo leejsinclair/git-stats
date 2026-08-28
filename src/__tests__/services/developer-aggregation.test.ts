@@ -3,7 +3,6 @@ import * as fs from 'fs/promises';
 
 import { DeveloperAggregationService } from '../../services/developer-aggregation.service';
 
-// Mock fs/promises before importing the service
 jest.mock('fs/promises');
 
 const mockFs = fs as jest.Mocked<typeof fs>;
